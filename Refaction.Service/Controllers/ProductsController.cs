@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net;
 using System.Web.Http;
-using refactor_me.Models;
+using Refaction.Service.Models;
 
-namespace refactor_me.Controllers
+namespace Refaction.Service.Controllers
 {
     [RoutePrefix("products")]
     public class ProductsController : ApiController

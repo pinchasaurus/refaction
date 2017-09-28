@@ -1,6 +1,6 @@
 ﻿using System.Web.Http;
 
-namespace refactor_me
+namespace Refaction.Service
 {
     public static class WebApiConfig
     {
