@@ -1,85 +1,130 @@
 ﻿using System;
 using System.Net;
 using System.Web.Http;
+using System.Collections.Generic;
+
+using System.Linq;
+
+using Refaction.Data;
 using Refaction.Service.Models;
+using Refaction.Service.Repositories;
 
 namespace Refaction.Service.Controllers
 {
     [RoutePrefix("products")]
     public class ProductsController : ApiController
     {
+        // create new db and repository for every request
+        RefactionDbContext _db;
+
+        ProductsRepository _products;
+        ProductOptionsRepository _productOptions;
+
+        ProductsController()
+        {
+            _db = new RefactionDbContext();
+
+            _products = new ProductsRepository(_db);
+            _productOptions = new ProductOptionsRepository(_db);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _db.SaveChanges();
+
+                _products.Dispose();
+                _productOptions.Dispose();
+
+                _db.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
+
         [Route]
         [HttpGet]
         public Products GetAll()
         {
-            return new Products();
+            var items = _products.Retrieve();
+
+            return new Products(items);
         }
 
         [Route]
         [HttpGet]
         public Products SearchByName(string name)
         {
-            return new Products(name);
+            var items = _products.Retrieve(name);
+
+            return new Products(items);
         }
 
         [Route("{id}")]
         [HttpGet]
         public Product GetProduct(Guid id)
         {
-            var product = new Product(id);
-            if (product.IsNew)
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+            var result = _products.Retrieve(id);
 
-            return product;
+            if (result == null)
+            {
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+            }
+            else
+            {
+                return result;
+            }
         }
 
         [Route]
         [HttpPost]
         public void Create(Product product)
         {
-            product.Save();
+            _products.Create(product);
         }
 
         [Route("{id}")]
         [HttpPut]
         public void Update(Guid id, Product product)
         {
-            var orig = new Product(id)
-            {
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                DeliveryPrice = product.DeliveryPrice
-            };
+            product.Id = id;
 
-            if (!orig.IsNew)
-                orig.Save();
+            _products.Update(product);
         }
 
         [Route("{id}")]
         [HttpDelete]
         public void Delete(Guid id)
         {
-            var product = new Product(id);
-            product.Delete();
+            _products.Delete(id);
         }
 
         [Route("{productId}/options")]
         [HttpGet]
         public ProductOptions GetOptions(Guid productId)
         {
-            return new ProductOptions(productId);
+            var items = _productOptions.RetrieveByProductId(productId);
+
+            return new ProductOptions(items);
         }
 
         [Route("{productId}/options/{id}")]
         [HttpGet]
         public ProductOption GetOption(Guid productId, Guid id)
         {
-            var option = new ProductOption(id);
-            if (option.IsNew)
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+            var result =
+                _productOptions
+                .RetrieveByBothIds(productId, id);
 
-            return option;
+            if (result == null)
+            {
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+            }
+            else
+            {
+                return result;
+            }
         }
 
         [Route("{productId}/options")]
@@ -87,29 +132,25 @@ namespace Refaction.Service.Controllers
         public void CreateOption(Guid productId, ProductOption option)
         {
             option.ProductId = productId;
-            option.Save();
+
+            _productOptions.Create(option);
         }
 
         [Route("{productId}/options/{id}")]
         [HttpPut]
         public void UpdateOption(Guid id, ProductOption option)
         {
-            var orig = new ProductOption(id)
-            {
-                Name = option.Name,
-                Description = option.Description
-            };
+            option.Id = id;
 
-            if (!orig.IsNew)
-                orig.Save();
+            _productOptions.Update(option);
         }
 
         [Route("{productId}/options/{id}")]
         [HttpDelete]
         public void DeleteOption(Guid id)
         {
-            var opt = new ProductOption(id);
-            opt.Delete();
+            _productOptions.Delete(id);
         }
+
     }
 }

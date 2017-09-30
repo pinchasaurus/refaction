@@ -1,16 +1,15 @@
-﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Web;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Refaction.Service.Models
+namespace Refaction.Data.Entities
 {
-    public class Product
+    public partial class ProductOptionEntity // appended "Entity" to avoid confusion with model of same name
     {
         public Guid Id { get; set; }
+
+        public Guid ProductId { get; set; }
 
         [Required]
         [StringLength(100)]
@@ -18,9 +17,5 @@ namespace Refaction.Service.Models
 
         [StringLength(500)]
         public string Description { get; set; }
-
-        public decimal Price { get; set; }
-
-        public decimal DeliveryPrice { get; set; }
     }
 }

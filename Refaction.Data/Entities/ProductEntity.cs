@@ -1,14 +1,11 @@
-﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Web;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Refaction.Service.Models
+namespace Refaction.Data.Entities
 {
-    public class Product
+    public partial class ProductEntity // appended "Entity" to avoid confusion with model of same name
     {
         public Guid Id { get; set; }
 
