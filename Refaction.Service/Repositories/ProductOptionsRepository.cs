@@ -13,11 +13,11 @@ using System.Web.Http;
 
 namespace Refaction.Service.Repositories
 {
-    public class ProductOptionsRepository : RepositoryBase<ProductOption, Guid>
+    public class ProductOptionRepository : RepositoryBase<ProductOption, Guid>
     {
-        protected RefactionDbContext _db;
+        protected IRefactionDbContext _db;
 
-        public ProductOptionsRepository(RefactionDbContext db)
+        public ProductOptionRepository(IRefactionDbContext db)
         {
             _db = db;
         }
@@ -27,14 +27,14 @@ namespace Refaction.Service.Repositories
             var productOption = 
                 new ProductOptionEntity()
                 {
+                    Id = model.Id,
                     Description = model.Description,
-                    Id = Guid.NewGuid(),
                     Name = model.Name,
                     ProductId = model.ProductId
                 };
 
 
-            _db.ProductOptionsEntities.Add(productOption);
+            _db.ProductOptionEntities.Add(productOption);
         }
 
 
@@ -42,7 +42,7 @@ namespace Refaction.Service.Repositories
         public override IEnumerable<ProductOption> Retrieve()
         {
             return
-                _db.ProductOptionsEntities
+                _db.ProductOptionEntities
                 .Select(ModelSelectorExpression)
                 .AsEnumerable()
                 ;
@@ -52,7 +52,7 @@ namespace Refaction.Service.Repositories
         {
             ProductOption result;
 
-            var productOption = _db.ProductOptionsEntities.SingleOrDefault(entity => entity.Id == id);
+            var productOption = _db.ProductOptionEntities.SingleOrDefault(entity => entity.Id == id);
 
             if (productOption == null)
             {
@@ -69,7 +69,7 @@ namespace Refaction.Service.Repositories
         public IEnumerable<ProductOption> RetrieveByProductId(Guid id)
         {
             return
-                _db.ProductOptionsEntities
+                _db.ProductOptionEntities
                 .Where(entity => entity.ProductId == id)
                 .Select(ModelSelectorExpression)
                 .AsEnumerable()
@@ -79,7 +79,7 @@ namespace Refaction.Service.Repositories
         public ProductOption RetrieveByBothIds(Guid productId, Guid id)
         {
             return
-                _db.ProductOptionsEntities
+                _db.ProductOptionEntities
                 .Where(entity =>
                     entity.ProductId == productId
                     && entity.Id == id
@@ -92,11 +92,11 @@ namespace Refaction.Service.Repositories
 
         public override void Update(ProductOption model)
         {
-            var productOption = _db.ProductOptionsEntities.Find(model.Id);
+            var productOption = _db.ProductOptionEntities.Find(model.Id);
 
             if (productOption == null)
             {
-                throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
+                throw new HttpResponseException_NotFoundException();
             }
 
             productOption.Description = model.Description;
@@ -107,31 +107,31 @@ namespace Refaction.Service.Repositories
 
         public override void Delete(Guid id)
         {
-            var productOption = _db.ProductOptionsEntities.SingleOrDefault(entity => entity.Id == id);
+            var productOption = _db.ProductOptionEntities.SingleOrDefault(entity => entity.Id == id);
 
             if (productOption == null)
             {
-                throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
+                throw new HttpResponseException_NotFoundException();
             }
 
-            _db.ProductOptionsEntities.Remove(productOption);
+            _db.ProductOptionEntities.Remove(productOption);
         }
 
         public override void Delete(ProductOption model)
         {
-            Delete(model);
+            Delete(model.Id);
         }
 
 
 
         public override bool Exists(Guid id)
         {
-            return _db.ProductOptionsEntities.Any(entity => entity.Id == id);
+            return _db.ProductOptionEntities.Any(entity => entity.Id == id);
         }
 
 
 
-        protected readonly static Expression<Func<ProductOptionEntity, ProductOption>> ModelSelectorExpression =
+        public readonly static Expression<Func<ProductOptionEntity, ProductOption>> ModelSelectorExpression =
             (ProductOptionEntity entity) =>
                 new ProductOption()
                 {
@@ -141,6 +141,6 @@ namespace Refaction.Service.Repositories
                     ProductId = entity.ProductId,
                 };
 
-        protected readonly static Func<ProductOptionEntity, ProductOption> ModelSelectorFunc = ModelSelectorExpression.Compile();
+        public readonly static Func<ProductOptionEntity, ProductOption> ModelSelectorFunc = ModelSelectorExpression.Compile();
     }
 }

@@ -10,6 +10,10 @@ namespace Refaction.Service.Models
 {
     public class ProductOption
     {
+        public ProductOption()
+        {
+        }
+
         public Guid Id { get; set; }
 
         public Guid ProductId { get; set; }
@@ -20,5 +24,14 @@ namespace Refaction.Service.Models
 
         [StringLength(500)]
         public string Description { get; set; }
+
+        // Copy constructor
+        public ProductOption(ProductOption other)
+        {
+            Id = other.Id;
+            Description = other.Description;
+            Name = other.Name;
+            ProductId = other.ProductId;
         }
+    }
 }

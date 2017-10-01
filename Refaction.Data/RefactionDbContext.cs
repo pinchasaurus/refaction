@@ -7,7 +7,7 @@ using Refaction.Data.Entities;
 
 namespace Refaction.Data
 {
-    public partial class RefactionDbContext : DbContext
+    public partial class RefactionDbContext : DbContext, IRefactionDbContext
     {
         public RefactionDbContext()
             : base("name=RefactionDatabase")
@@ -22,9 +22,9 @@ namespace Refaction.Data
 #endif
         }
 
-        public virtual DbSet<ProductEntity> ProductEntities { get; set; } // appended "Entities" to avoid confusion with model of same name
+        public virtual IDbSet<ProductEntity> ProductEntities { get; set; } // appended "Entities" to avoid confusion with model of same name
 
-        public virtual DbSet<ProductOptionEntity> ProductOptionsEntities { get; set; } // appended "Entities" to avoid confusion with model of same name
+        public virtual IDbSet<ProductOptionEntity> ProductOptionEntities { get; set; } // appended "Entities" to avoid confusion with model of same name
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

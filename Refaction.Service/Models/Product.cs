@@ -10,6 +10,10 @@ namespace Refaction.Service.Models
 {
     public class Product
     {
+        public Product()
+        {
+        }
+
         public Guid Id { get; set; }
 
         [Required]
@@ -22,5 +26,16 @@ namespace Refaction.Service.Models
         public decimal Price { get; set; }
 
         public decimal DeliveryPrice { get; set; }
+
+        // Copy constructor
+        public Product(Product other)
+        {
+            Id = other.Id;
+            DeliveryPrice = other.DeliveryPrice;
+            Description = other.Description;
+            Name = other.Name;
+            Price = other.Price;
+        }
     }
+
 }

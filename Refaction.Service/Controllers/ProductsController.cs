@@ -8,6 +8,7 @@ using System.Linq;
 using Refaction.Data;
 using Refaction.Service.Models;
 using Refaction.Service.Repositories;
+using Refaction.Data.Fakes;
 
 namespace Refaction.Service.Controllers
 {
@@ -15,17 +16,17 @@ namespace Refaction.Service.Controllers
     public class ProductsController : ApiController
     {
         // create new db and repository for every request
-        RefactionDbContext _db;
+        IRefactionDbContext _db;
 
-        ProductsRepository _products;
-        ProductOptionsRepository _productOptions;
+        ProductRepository _products;
+        ProductOptionRepository _productOptions;
 
         ProductsController()
         {
             _db = new RefactionDbContext();
 
-            _products = new ProductsRepository(_db);
-            _productOptions = new ProductOptionsRepository(_db);
+            _products = new ProductRepository(_db);
+            _productOptions = new ProductOptionRepository(_db);
         }
 
         protected override void Dispose(bool disposing)
@@ -81,6 +82,8 @@ namespace Refaction.Service.Controllers
         [HttpPost]
         public void Create(Product product)
         {
+            product.Id = Guid.NewGuid();
+
             _products.Create(product);
         }
 
@@ -131,6 +134,7 @@ namespace Refaction.Service.Controllers
         [HttpPost]
         public void CreateOption(Guid productId, ProductOption option)
         {
+            option.Id = Guid.NewGuid();
             option.ProductId = productId;
 
             _productOptions.Create(option);

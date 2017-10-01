@@ -51,6 +51,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EntityComparer.cs" />
+    <Compile Include="Fakes\FakeDbSet.cs" />
+    <Compile Include="Fakes\FakeProductDbSet.cs" />
+    <Compile Include="Fakes\FakeProductOptionDbSet.cs" />
+    <Compile Include="Fakes\FakeRefactionContext.cs" />
+    <Compile Include="IDbContext.cs" />
+    <Compile Include="IRefactionDbContext.cs" />
     <Compile Include="RefactionDbContext.cs" />
     <Compile Include="Entities\ProductEntity.cs" />
     <Compile Include="Entities\ProductOptionEntity.cs" />

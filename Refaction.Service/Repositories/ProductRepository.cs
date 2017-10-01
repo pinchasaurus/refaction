@@ -14,22 +14,22 @@ using Refaction.Data.Entities;
 
 namespace Refaction.Service.Repositories
 {
-    public class ProductsRepository : RepositoryBase<Product, Guid>
+    public class ProductRepository : RepositoryBase<Product, Guid>
     {
-        protected RefactionDbContext _db;
+        protected IRefactionDbContext _db;
 
-        public ProductsRepository(RefactionDbContext db)
+        public ProductRepository(IRefactionDbContext db)
         {
             _db = db;
         }
-
+        
 
         public override void Create(Product model)
         {
             var product =
                 new ProductEntity()
                 {
-                    Id = Guid.NewGuid(),
+                    Id = model.Id,
                     DeliveryPrice = model.DeliveryPrice,
                     Description = model.Description,
                     Name = model.Name,
@@ -90,7 +90,7 @@ namespace Refaction.Service.Repositories
 
             if (product == null)
             {
-                throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
+                throw new HttpResponseException_NotFoundException();
             }
 
             product.DeliveryPrice = model.DeliveryPrice;
@@ -106,13 +106,19 @@ namespace Refaction.Service.Repositories
 
             if (product == null)
             {
-                throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
+                throw new HttpResponseException_NotFoundException();
             }
 
-            var productOptions = _db.ProductOptionsEntities.Where(productOption => productOption.ProductId == id);
+            var productOptions = 
+                _db.ProductOptionEntities
+                .Where(productOption => productOption.ProductId == id)
+                .ToList();
 
             // cascading delete of all related product options
-            _db.ProductOptionsEntities.RemoveRange(productOptions);
+            foreach (var productOption in productOptions)
+            {
+                _db.ProductOptionEntities.Remove(productOption);
+            }
 
             // delete product
             _db.ProductEntities.Remove(product);
@@ -131,7 +137,7 @@ namespace Refaction.Service.Repositories
         }
 
 
-        protected readonly static Expression<Func<ProductEntity, Product>> ModelSelectorExpression =
+        public readonly static Expression<Func<ProductEntity, Product>> ModelSelectorExpression =
             (ProductEntity entity) =>
                 new Product()
                 {
@@ -142,6 +148,6 @@ namespace Refaction.Service.Repositories
                     Price = entity.Price,
                 };
 
-        protected readonly static Func<ProductEntity, Product> ModelSelectorFunc = ModelSelectorExpression.Compile();
+        public readonly static Func<ProductEntity, Product> ModelSelectorFunc = ModelSelectorExpression.Compile();
     }
 }
