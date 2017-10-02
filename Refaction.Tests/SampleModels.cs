@@ -13,13 +13,15 @@ namespace Refaction.Tests
     /// </summary>
     public static class SampleModels
     {
-        public static readonly Product Product0 = ProductRepository.ModelSelectorFunc(SampleData.ProductEntity0);
-        public static readonly Product Product1 = ProductRepository.ModelSelectorFunc(SampleData.ProductEntity1);
-        public static readonly Product Product2 = ProductRepository.ModelSelectorFunc(SampleData.ProductEntity2);
+        // To prevent modification of the sample models, always return a copy of the underlying models
 
-        public static readonly ProductOption ProductOption0 = ProductOptionRepository.ModelSelectorFunc(SampleData.ProductOptionEntity0);
-        public static readonly ProductOption ProductOption1 = ProductOptionRepository.ModelSelectorFunc(SampleData.ProductOptionEntity1);
-        public static readonly ProductOption ProductOption2 = ProductOptionRepository.ModelSelectorFunc(SampleData.ProductOptionEntity2);
-        public static readonly ProductOption ProductOption3 = ProductOptionRepository.ModelSelectorFunc(SampleData.ProductOptionEntity3);
+        internal static Product Product0 { get { return ProductRepository.ModelSelectorFunc(SampleData.ProductEntity0); } }
+        internal static Product Product1 { get { return ProductRepository.ModelSelectorFunc(SampleData.ProductEntity1); } }
+        internal static Product Product2 { get { return ProductRepository.ModelSelectorFunc(SampleData.ProductEntity2); } }
+
+        internal static ProductOption ProductOption0 { get { return ProductOptionRepository.ModelSelectorFunc(SampleData.ProductOptionEntity0); } }
+        internal static ProductOption ProductOption1 { get { return ProductOptionRepository.ModelSelectorFunc(SampleData.ProductOptionEntity1); } }
+        internal static ProductOption ProductOption2 { get { return ProductOptionRepository.ModelSelectorFunc(SampleData.ProductOptionEntity2); } }
+        internal static ProductOption ProductOption3 { get { return ProductOptionRepository.ModelSelectorFunc(SampleData.ProductOptionEntity3); } }
     }
 }

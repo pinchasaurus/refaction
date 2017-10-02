@@ -35,7 +35,7 @@ namespace Refaction.Data.Fakes
             ProductOptionEntities = new FakeProductOptionDbSet(copyOfProductOptionEntities);
         }
 
-        ProductEntity CreateCopy(ProductEntity other)  
+        public static ProductEntity CreateCopy(ProductEntity other)  
         {
             // Entities should not have a copy constructor, but we need to create copies of sample entities during testing, so do it here.
             return new ProductEntity
@@ -48,7 +48,7 @@ namespace Refaction.Data.Fakes
             };
         }
 
-        ProductOptionEntity CreateCopy(ProductOptionEntity other)
+        public static ProductOptionEntity CreateCopy(ProductOptionEntity other)
         {
             // Entities should not have a copy constructor, but we need to create copies of sample entities during testing, so do it here.
             return new ProductOptionEntity

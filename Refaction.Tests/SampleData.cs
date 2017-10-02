@@ -1,4 +1,5 @@
 ﻿using Refaction.Data.Entities;
+using Refaction.Data.Fakes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,9 @@ namespace Refaction.Tests
     /// </summary>
     public static class SampleData
     {
-        public static readonly ProductEntity[] ProductEntities = new ProductEntity[]
+        // To prevent modification of the sample entities, always return a copy of the underlying entities
+
+        internal static readonly ProductEntity[] ProductEntities = new ProductEntity[]
         {
             new ProductEntity
             {
@@ -40,11 +43,11 @@ namespace Refaction.Tests
             },
         };
 
-        public static readonly ProductEntity ProductEntity0 = ProductEntities[0];
-        public static readonly ProductEntity ProductEntity1 = ProductEntities[1];
-        public static readonly ProductEntity ProductEntity2 = ProductEntities[2];
+        internal static ProductEntity ProductEntity0 { get { return FakeRefactionDbContext.CreateCopy(ProductEntities[0]); } }
+        internal static ProductEntity ProductEntity1 { get { return FakeRefactionDbContext.CreateCopy(ProductEntities[1]); } }
+        internal static ProductEntity ProductEntity2 { get { return FakeRefactionDbContext.CreateCopy(ProductEntities[2]); } }
 
-        public static readonly ProductOptionEntity[] ProductOptionEntities = new ProductOptionEntity[]
+        internal static readonly ProductOptionEntity[] ProductOptionEntities = new ProductOptionEntity[]
         {
             new ProductOptionEntity
             {
@@ -76,9 +79,9 @@ namespace Refaction.Tests
             },
         };
 
-        public static readonly ProductOptionEntity ProductOptionEntity0 = ProductOptionEntities[0];
-        public static readonly ProductOptionEntity ProductOptionEntity1 = ProductOptionEntities[1];
-        public static readonly ProductOptionEntity ProductOptionEntity2 = ProductOptionEntities[2];
-        public static readonly ProductOptionEntity ProductOptionEntity3 = ProductOptionEntities[3];
+        internal static ProductOptionEntity ProductOptionEntity0 { get { return FakeRefactionDbContext.CreateCopy(ProductOptionEntities[0]); } }
+        internal static ProductOptionEntity ProductOptionEntity1 { get { return FakeRefactionDbContext.CreateCopy(ProductOptionEntities[1]); } }
+        internal static ProductOptionEntity ProductOptionEntity2 { get { return FakeRefactionDbContext.CreateCopy(ProductOptionEntities[2]); } }
+        internal static ProductOptionEntity ProductOptionEntity3 { get { return FakeRefactionDbContext.CreateCopy(ProductOptionEntities[3]); } }
     }
 }

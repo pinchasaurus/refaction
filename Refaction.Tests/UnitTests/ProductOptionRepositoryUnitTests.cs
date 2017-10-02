@@ -24,7 +24,7 @@ namespace Refaction.Tests.UnitTests
     {
         ProductOptionRepository CurrentProductOptionsRepository
         {
-            get { return CurrentNinjectKernel.Get<ProductOptionRepository>(); }
+            get { return NinjectKernel.Get<ProductOptionRepository>(); }
         }
 
         [TestMethod]

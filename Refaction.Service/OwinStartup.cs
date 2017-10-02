@@ -10,6 +10,9 @@ using Ninject;
 using Ninject.Web.Common.OwinHost;
 using Ninject.Web.WebApi.OwinHost;
 using System.Reflection;
+using Refaction.Data;
+using Refaction.Common;
+using Refaction.Data.Fakes;
 
 [assembly: OwinStartup(typeof(Refaction.Service.OwinStartup))]
 
@@ -17,6 +20,8 @@ namespace Refaction.Service
 {
     public class OwinStartup
     {
+        public static IKernel NinjectKernel;
+
         public void Configuration(IAppBuilder appBuilder)
         {
             var config = new HttpConfiguration();
@@ -24,18 +29,25 @@ namespace Refaction.Service
             // register routes and formatters
             WebApiConfig.Register(config);
 
-            // enable Web API
-            appBuilder.UseWebApi(config);
-
             // enable Ninject for Web API controllers
-            appBuilder.UseNinjectMiddleware(CreateKernel).UseNinjectWebApi(config);
+            appBuilder.UseNinjectMiddleware(GetOrCreateKernel);
+            appBuilder.UseNinjectWebApi(config);
+
+            // always do this last
+            appBuilder.UseWebApi(config);
         }
 
-        private static StandardKernel CreateKernel()
+        private static IKernel GetOrCreateKernel()
         {
-            var kernel = new StandardKernel();
-            kernel.Load(Assembly.GetExecutingAssembly());
-            return kernel;
+            if (NinjectKernel == null)
+            {
+                var kernel = new StandardKernel();
+                kernel.Load(Assembly.GetExecutingAssembly());
+
+                NinjectKernel = kernel;
+            }
+
+            return NinjectKernel;
         }
     }
 }

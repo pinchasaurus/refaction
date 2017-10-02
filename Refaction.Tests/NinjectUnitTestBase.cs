@@ -13,19 +13,17 @@ namespace Refaction.UnitTests
 {
     public abstract class NinjectUnitTestBase : UnitTestBase
     {
-        protected IKernel CurrentNinjectKernel { get; set; }
+        private IKernel _ninjectKernel;
+
+        protected IKernel NinjectKernel
+        {
+            get { return _ninjectKernel; }
+        }
 
         public NinjectUnitTestBase()
         {
-            var kernel = new StandardKernel();
-
-            ResetNinjectKernel(kernel);
-        }
-
-        protected void ResetNinjectKernel(IKernel kernel)
-        {
-            CurrentNinjectKernel = kernel;
-            CurrentNinjectKernel.Load(Assembly.GetExecutingAssembly());
+            _ninjectKernel = new StandardKernel();
+            _ninjectKernel.Load(Assembly.GetExecutingAssembly());
         }
 
         /// <summary>
@@ -33,7 +31,7 @@ namespace Refaction.UnitTests
         /// </summary>
         protected void RemovePriorBindings(Type service)
         {
-            NinjectHelper.RemovePriorBindings(CurrentNinjectKernel, service);
+            NinjectHelper.RemovePriorBindings(NinjectKernel, service);
         }
 
     }

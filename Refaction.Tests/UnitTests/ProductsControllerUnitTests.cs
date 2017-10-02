@@ -22,7 +22,7 @@ namespace Refaction.UnitTests.UnitTests
     {
         public ProductsController CurrentProductsController
         {
-            get { return CurrentNinjectKernel.Get<ProductsController>(); }
+            get { return NinjectKernel.Get<ProductsController>(); }
         }
 
         [TestMethod]
@@ -40,7 +40,7 @@ namespace Refaction.UnitTests.UnitTests
                     Price = 4.44M,
                 };
 
-            CurrentProductsController.Create(product);
+            CurrentProductsController.CreateProduct(product);
 
             var createdProduct = CurrentProductsController.GetProduct(product.Id);
 
@@ -62,7 +62,7 @@ namespace Refaction.UnitTests.UnitTests
                     Price = 4.44M,
                 };
 
-            CurrentProductsController.Create(product);
+            CurrentProductsController.CreateProduct(product);
 
             var createdProduct = CurrentProductsController.GetProduct(product.Id);
 
@@ -74,7 +74,7 @@ namespace Refaction.UnitTests.UnitTests
         {
             UseEmptyDatabase();
 
-            var products = CurrentProductsController.GetAll();
+            var products = CurrentProductsController.GetAllProducts();
 
             var productsArray = products.Items.ToArray();
 
@@ -86,7 +86,7 @@ namespace Refaction.UnitTests.UnitTests
         {
             UseDatabaseWithSampleData();
 
-            var products = CurrentProductsController.GetAll();
+            var products = CurrentProductsController.GetAllProducts();
 
             var productsArray = products.Items.ToArray();
 
@@ -121,7 +121,7 @@ namespace Refaction.UnitTests.UnitTests
         {
             UseEmptyDatabase();
 
-            var products = CurrentProductsController.SearchByName("0");
+            var products = CurrentProductsController.GetProductsByName("0");
 
             var productsArray = products.Items.ToArray();
 
@@ -133,7 +133,7 @@ namespace Refaction.UnitTests.UnitTests
         {
             UseDatabaseWithSampleData();
 
-            var products = CurrentProductsController.SearchByName("0");
+            var products = CurrentProductsController.GetProductsByName("0");
 
             var productsArray = products.Items.ToArray();
 
@@ -150,7 +150,7 @@ namespace Refaction.UnitTests.UnitTests
             var product = SampleModels.Product0;
             product.DeliveryPrice = 1234.56M;
 
-            CurrentProductsController.Update(product.Id, product);
+            CurrentProductsController.UpdateProduct(product.Id, product);
         }
 
         [TestMethod]
@@ -161,7 +161,7 @@ namespace Refaction.UnitTests.UnitTests
             var product = SampleModels.Product0;
             product.DeliveryPrice = 1234.56M;
 
-            CurrentProductsController.Update(product.Id, product);
+            CurrentProductsController.UpdateProduct(product.Id, product);
 
             var updatedProduct = CurrentProductsController.GetProduct(product.Id);
 
@@ -176,7 +176,7 @@ namespace Refaction.UnitTests.UnitTests
 
             var product = SampleModels.Product0;
 
-            CurrentProductsController.Delete(product.Id);
+            CurrentProductsController.DeleteProduct(product.Id);
         }
 
         [TestMethod]
@@ -187,7 +187,7 @@ namespace Refaction.UnitTests.UnitTests
 
             var product = SampleModels.Product0;
 
-            CurrentProductsController.Delete(product.Id);
+            CurrentProductsController.DeleteProduct(product.Id);
 
             CurrentProductsController.GetProduct(product.Id);
         }

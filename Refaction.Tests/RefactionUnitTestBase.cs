@@ -17,16 +17,21 @@ namespace Refaction.UnitTests
 {
     public abstract class RefactionUnitTestBase : NinjectUnitTestBase
     {
+        public RefactionUnitTestBase()
+        {
+            Refaction.Service.OwinStartup.NinjectKernel = this.NinjectKernel;
+        }
+
         protected IRefactionDbContext CurrentDbContext
         {
-            get { return CurrentNinjectKernel.Get<IRefactionDbContext>(); }
+            get { return NinjectKernel.Get<IRefactionDbContext>(); }
         }
 
         public void UseEmptyDatabase()
         {
             RemovePriorBindings(typeof(IRefactionDbContext));
 
-            CurrentNinjectKernel.Bind<IRefactionDbContext>()
+            NinjectKernel.Bind<IRefactionDbContext>()
                 .To<FakeRefactionDbContext>()
                 .InSingletonScope();
         }
@@ -35,7 +40,7 @@ namespace Refaction.UnitTests
         {
             RemovePriorBindings(typeof(IRefactionDbContext));
 
-            CurrentNinjectKernel.Bind<IRefactionDbContext>()
+            NinjectKernel.Bind<IRefactionDbContext>()
                 .To<FakeRefactionDbContext>()
                 .InSingletonScope()
                 .WithConstructorArgument<IEnumerable<ProductEntity>>(SampleData.ProductEntities)

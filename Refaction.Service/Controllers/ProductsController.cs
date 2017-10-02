@@ -50,7 +50,7 @@ namespace Refaction.Service.Controllers
 
         [Route]
         [HttpGet]
-        public Products GetAll()
+        public Products GetAllProducts()
         {
             var items = _products.Retrieve();
 
@@ -59,7 +59,7 @@ namespace Refaction.Service.Controllers
 
         [Route]
         [HttpGet]
-        public Products SearchByName(string name)
+        public Products GetProductsByName(string name)
         {
             var items = _products.Retrieve(name);
 
@@ -84,7 +84,7 @@ namespace Refaction.Service.Controllers
 
         [Route]
         [HttpPost]
-        public void Create(Product product)
+        public void CreateProduct(Product product)
         {
             product.Id = Guid.NewGuid();
 
@@ -93,7 +93,7 @@ namespace Refaction.Service.Controllers
 
         [Route("{id}")]
         [HttpPut]
-        public void Update(Guid id, Product product)
+        public void UpdateProduct(Guid id, Product product)
         {
             product.Id = id;
 
@@ -102,7 +102,7 @@ namespace Refaction.Service.Controllers
 
         [Route("{id}")]
         [HttpDelete]
-        public void Delete(Guid id)
+        public void DeleteProduct(Guid id)
         {
             _products.Delete(id);
         }
