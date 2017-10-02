@@ -28,9 +28,38 @@ namespace Refaction.Data.Fakes
 
         public FakeRefactionDbContext(IEnumerable<ProductEntity> productEntities, IEnumerable<ProductOptionEntity> productOptionEntities)
         {
-            ProductEntities = new FakeProductDbSet(productEntities);
-            ProductOptionEntities = new FakeProductOptionDbSet(productOptionEntities);
+            var copyOfProductEntities = productEntities.Select(productEntity => CreateCopy(productEntity));
+            var copyOfProductOptionEntities = productOptionEntities.Select(productOptionEntity => CreateCopy(productOptionEntity));
+
+            ProductEntities = new FakeProductDbSet(copyOfProductEntities);
+            ProductOptionEntities = new FakeProductOptionDbSet(copyOfProductOptionEntities);
         }
+
+        ProductEntity CreateCopy(ProductEntity other)  
+        {
+            // Entities should not have a copy constructor, but we need to create copies of sample entities during testing, so do it here.
+            return new ProductEntity
+            {
+                DeliveryPrice = other.DeliveryPrice,
+                Description = other.Description,
+                Id = other.Id,
+                Name = other.Name,
+                Price = other.Price,
+            };
+        }
+
+        ProductOptionEntity CreateCopy(ProductOptionEntity other)
+        {
+            // Entities should not have a copy constructor, but we need to create copies of sample entities during testing, so do it here.
+            return new ProductOptionEntity
+            {
+                Description = other.Description,
+                Id = other.Id,
+                Name = other.Name,
+                ProductId = other.ProductId,
+            };
+        }
+
 
         public IDbSet<ProductEntity> ProductEntities { get; set; }
 

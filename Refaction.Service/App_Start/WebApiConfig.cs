@@ -7,7 +7,7 @@ namespace Refaction.Service
         public static void Register(HttpConfiguration config)
         {
             // Web API configuration and services
-            var formatters = GlobalConfiguration.Configuration.Formatters;
+            var formatters = config.Formatters;
             formatters.Remove(formatters.XmlFormatter);
             formatters.JsonFormatter.Indent = true;
 

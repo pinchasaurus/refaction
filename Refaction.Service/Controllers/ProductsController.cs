@@ -21,9 +21,13 @@ namespace Refaction.Service.Controllers
         ProductRepository _products;
         ProductOptionRepository _productOptions;
 
-        ProductsController()
+        public ProductsController()
         {
-            _db = new RefactionDbContext();
+        }
+
+        public ProductsController(IRefactionDbContext db)
+        {
+            _db = db;
 
             _products = new ProductRepository(_db);
             _productOptions = new ProductOptionRepository(_db);
@@ -70,7 +74,7 @@ namespace Refaction.Service.Controllers
 
             if (result == null)
             {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                throw new HttpResponseException_NotFoundException();
             }
             else
             {
@@ -122,7 +126,7 @@ namespace Refaction.Service.Controllers
 
             if (result == null)
             {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                throw new HttpResponseException_NotFoundException();
             }
             else
             {

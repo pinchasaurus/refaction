@@ -11,7 +11,7 @@ namespace Refaction.Service
     {
         protected void Application_Start()
         {
-            GlobalConfiguration.Configure(WebApiConfig.Register);
+            // do nothing, startup is handled by OWIN (Open Web Interface for .NET)
         }
     }
 }

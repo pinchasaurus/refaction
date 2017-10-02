@@ -11,6 +11,8 @@ using System.Web.Http;
 using System.Linq;
 using Refaction.Service;
 using Refaction.Data.Fakes;
+using Refaction.UnitTests;
+using Ninject;
 
 namespace Refaction.Tests.UnitTests
 {
@@ -18,27 +20,18 @@ namespace Refaction.Tests.UnitTests
     /// Unit tests for 100% code-coverage of ProductOptionRepository
     /// </summary>
     [TestClass]
-    public class ProductOptionRepositoryUnitTests
+    public class ProductOptionRepositoryUnitTests : RefactionUnitTestBase
     {
-        IRefactionDbContext _db;
-        ProductOptionRepository _productOptionRepository;
-
-        [TestInitialize]
-        public void InitializeDatabaseWithNoData()
+        ProductOptionRepository CurrentProductOptionsRepository
         {
-            _db = new FakeRefactionDbContext();
-            _productOptionRepository = new ProductOptionRepository(_db);
-        }
-
-        public void InitializeDatabaseWithSampleData()
-        {
-            _db = new FakeRefactionDbContext(SampleData.ProductEntities, SampleData.ProductOptionEntities);
-            _productOptionRepository = new ProductOptionRepository(_db);
+            get { return CurrentNinjectKernel.Get<ProductOptionRepository>(); }
         }
 
         [TestMethod]
         public void ProductOptionRepository_CreateProductOptionInEmptyDatabase()
         {
+            UseEmptyDatabase();
+
             var model =
                 new ProductOption
                 {
@@ -49,9 +42,9 @@ namespace Refaction.Tests.UnitTests
                 };
 
             // act
-            _productOptionRepository.Create(model);
+            CurrentProductOptionsRepository.Create(model);
 
-            var productOptionEntities = _db.ProductOptionEntities.Local;
+            var productOptionEntities = CurrentDbContext.ProductOptionEntities.Local;
 
             // assert
             Assert.IsTrue(productOptionEntities.Count == 1);
@@ -69,24 +62,26 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductOptionRepository_RetrieveAllProductOptionsUsingSampleData()
         {
-            InitializeDatabaseWithSampleData();
+            UseDatabaseWithSampleData();
 
             var productOptions =
-                _productOptionRepository.Retrieve()
+                CurrentProductOptionsRepository.Retrieve()
                 .ToArray();
 
-            Assert.IsTrue(productOptions.Count() == 2);
+            Assert.IsTrue(productOptions.Count() == 4);
 
             Assert.IsTrue(ModelComparer.AreEquivalent(productOptions[0], SampleModels.ProductOption0));
             Assert.IsTrue(ModelComparer.AreEquivalent(productOptions[1], SampleModels.ProductOption1));
+            Assert.IsTrue(ModelComparer.AreEquivalent(productOptions[2], SampleModels.ProductOption2));
+            Assert.IsTrue(ModelComparer.AreEquivalent(productOptions[3], SampleModels.ProductOption3));
         }
 
         [TestMethod]
         public void ProductOptionRepository_RetrieveProductOptionByIdUsingSampleData()
         {
-            InitializeDatabaseWithSampleData();
+            UseDatabaseWithSampleData();
 
-            var model = _productOptionRepository.Retrieve(SampleModels.ProductOption1.Id);
+            var model = CurrentProductOptionsRepository.Retrieve(SampleModels.ProductOption1.Id);
 
             Assert.IsTrue(ModelComparer.AreEquivalent(model, SampleModels.ProductOption1));
         }
@@ -94,7 +89,9 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductOptionRepository_RetrieveProductOptionByIdFromEmptyDatabase_ShouldReturnNull()
         {
-            var productOption = _productOptionRepository.Retrieve(SampleModels.ProductOption1.Id);
+            UseEmptyDatabase();
+
+            var productOption = CurrentProductOptionsRepository.Retrieve(SampleModels.ProductOption1.Id);
 
             Assert.IsNull(productOption);
         }
@@ -102,25 +99,26 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductOptionRepository_RetrieveProductOptionByProductIdUsingSampleData()
         {
-            InitializeDatabaseWithSampleData();
+            UseDatabaseWithSampleData();
 
-            var productId = SampleModels.Product1.Id;
+            var productOptions = CurrentProductOptionsRepository.RetrieveByProductId(SampleModels.Product0.Id);
 
-            var productOptions = _productOptionRepository.RetrieveByProductId(productId);
+            Assert.IsTrue(productOptions.Count() == 2);
 
-            Assert.IsTrue(productOptions.Count() == 1);
+            var productOptionsArray = productOptions.ToArray();
 
-            var productOption = productOptions.Single();
-
-            Assert.IsTrue(ModelComparer.AreEquivalent(productOption, SampleModels.ProductOption1));
+            Assert.IsTrue(ModelComparer.AreEquivalent(productOptionsArray[0], SampleModels.ProductOption0));
+            Assert.IsTrue(ModelComparer.AreEquivalent(productOptionsArray[1], SampleModels.ProductOption2));
         }
 
         [TestMethod]
         public void ProductOptionRepository_RetrieveProductOptionByProductIdFromEmptyDatabase_ShouldReturnNull()
         {
+            UseEmptyDatabase();
+
             var productId = SampleModels.Product1.Id;
 
-            var productOptions = _productOptionRepository.RetrieveByProductId(productId);
+            var productOptions = CurrentProductOptionsRepository.RetrieveByProductId(productId);
 
             Assert.IsTrue(productOptions.Count() == 0);
         }
@@ -128,11 +126,11 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductOptionRepository_RetrieveProductOptionByBothIdsUsingSampleData()
         {
-            InitializeDatabaseWithSampleData();
+            UseDatabaseWithSampleData();
 
             var productId = SampleModels.Product1.Id;
 
-            var productOption = _productOptionRepository.RetrieveByBothIds(productId, SampleModels.ProductOption1.Id);
+            var productOption = CurrentProductOptionsRepository.RetrieveByBothIds(productId, SampleModels.ProductOption1.Id);
 
             Assert.IsTrue(ModelComparer.AreEquivalent(productOption, SampleModels.ProductOption1));
         }
@@ -140,9 +138,11 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductOptionRepository_RetrieveProductOptionByBothIdsFromEmptyDatabase_ShouldReturnNull()
         {
+            UseEmptyDatabase();
+
             var productId = SampleModels.Product1.Id;
 
-            var productOption = _productOptionRepository.RetrieveByBothIds(productId, SampleModels.ProductOption1.Id);
+            var productOption = CurrentProductOptionsRepository.RetrieveByBothIds(productId, SampleModels.ProductOption1.Id);
 
             Assert.IsNull(productOption);
         }
@@ -151,15 +151,15 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductOptionRepository_UpdateProductOption()
         {
-            InitializeDatabaseWithSampleData();
+            UseDatabaseWithSampleData();
 
             var productOption = new ProductOption(SampleModels.ProductOption1);
 
             productOption.Description = "The updated product";
 
-            _productOptionRepository.Update(productOption);
+            CurrentProductOptionsRepository.Update(productOption);
 
-            var updatedProductOption = _productOptionRepository.Retrieve(productOption.Id);
+            var updatedProductOption = CurrentProductOptionsRepository.Retrieve(productOption.Id);
 
             Assert.IsTrue(ModelComparer.AreEquivalent(productOption, updatedProductOption));
         }
@@ -168,40 +168,46 @@ namespace Refaction.Tests.UnitTests
         [ExpectedException(typeof(HttpResponseException_NotFoundException))]
         public void ProductOptionRepository_UpdateProductOptionInEmptyDatabase_ShouldThrowNotFoundException()
         {
+            UseEmptyDatabase();
+
             var productOption = new ProductOption(SampleModels.ProductOption1);
 
             productOption.Name = "The updated product";
 
-            _productOptionRepository.Update(productOption);
+            CurrentProductOptionsRepository.Update(productOption);
         }
 
         [TestMethod]
         public void ProductOptionRepository_DeleteProductOptionUsingSampleData()
         {
-            InitializeDatabaseWithSampleData();
+            UseDatabaseWithSampleData();
 
-            _productOptionRepository.Delete(SampleModels.ProductOption1);
+            CurrentProductOptionsRepository.Delete(SampleModels.ProductOption1);
 
-            // verify products
-            var productOptionEntities = _db.ProductOptionEntities.Local;
-            Assert.IsTrue(productOptionEntities.Count == 1);
+            var productOptionEntities = CurrentDbContext.ProductOptionEntities.Local;
+            Assert.IsTrue(productOptionEntities.Count == 3);
 
-            productOptionEntities = _db.ProductOptionEntities.Local;
-            var remainingProductOptionEntity = productOptionEntities[0];
-            Assert.IsTrue(EntityComparer.AreEquivalent(remainingProductOptionEntity, SampleData.ProductOptionEntity0));
+            productOptionEntities = CurrentDbContext.ProductOptionEntities.Local;
+            Assert.IsTrue(EntityComparer.AreEquivalent(productOptionEntities[0], SampleData.ProductOptionEntity0));
+            Assert.IsTrue(EntityComparer.AreEquivalent(productOptionEntities[1], SampleData.ProductOptionEntity2));
+            Assert.IsTrue(EntityComparer.AreEquivalent(productOptionEntities[2], SampleData.ProductOptionEntity3));
         }
 
         [TestMethod]
         [ExpectedException(typeof(HttpResponseException_NotFoundException))]
         public void ProductOptionRepository_DeleteProductFromEmptyDatabase_ShouldThrowNotFoundException()
         {
-            _productOptionRepository.Delete(SampleModels.ProductOption1);
+            UseEmptyDatabase();
+
+            CurrentProductOptionsRepository.Delete(SampleModels.ProductOption1);
         }
 
         [TestMethod]
         public void ProductOptionRepository_ExistsProductInEmptyDatabase_ShouldReturnFalse()
         {
-            var result = _productOptionRepository.Exists(SampleModels.ProductOption1.Id);
+            UseEmptyDatabase();
+
+            var result = CurrentProductOptionsRepository.Exists(SampleModels.ProductOption1.Id);
 
             Assert.IsFalse(result);
         }
@@ -209,9 +215,9 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductOptionRepository_ExistsProductUsingSampleData_ShouldReturnTrue()
         {
-            InitializeDatabaseWithSampleData();
+            UseDatabaseWithSampleData();
 
-            var result = _productOptionRepository.Exists(SampleModels.ProductOption1.Id);
+            var result = CurrentProductOptionsRepository.Exists(SampleModels.ProductOption1.Id);
 
             Assert.IsTrue(result);
         }
