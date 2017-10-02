@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using Ninject;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Refaction.Common;
 
 namespace Refaction.UnitTests
 {
@@ -32,11 +33,7 @@ namespace Refaction.UnitTests
         /// </summary>
         protected void RemovePriorBindings(Type service)
         {
-            var bindings = CurrentNinjectKernel.GetBindings(service);
-            foreach (var binding in bindings)
-            {
-                CurrentNinjectKernel.RemoveBinding(binding);
-            }
+            NinjectHelper.RemovePriorBindings(CurrentNinjectKernel, service);
         }
 
     }
