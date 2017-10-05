@@ -44,7 +44,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NinjectHelper.cs" />
     <Compile Include="Patterns\IRepository.cs" />
     <Compile Include="Patterns\RepositoryBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -60,7 +60,6 @@ namespace Refaction.Data.Fakes
             };
         }
 
-
         public IDbSet<ProductEntity> ProductEntities { get; set; }
 
         public IDbSet<ProductOptionEntity> ProductOptionEntities { get; set; }

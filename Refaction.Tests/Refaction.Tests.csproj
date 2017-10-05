@@ -116,16 +116,26 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="RefactionUnitTestBase.cs" />
+    <Compile Include="EntityFactory.cs" />
+    <Compile Include="IntegrationTests\RefactionServiceIntegrationTests.cs" />
+    <Compile Include="Mocks\MockProductRepository.cs" />
+    <Compile Include="RefactionTestUsingFakesBase.cs" />
+    <Compile Include="RefactionTestUsingMocksBase.cs" />
+    <Compile Include="Mocks\MockDbSet.cs" />
+    <Compile Include="Mocks\MockProductOptionRepository.cs" />
+    <Compile Include="Mocks\MockQueryProvider.cs" />
+    <Compile Include="Mocks\MockQueryable.cs" />
+    <Compile Include="Mocks\MockRefactionDbContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="NinjectUnitTestBase.cs" />
-    <Compile Include="UnitTestBase.cs" />
-    <Compile Include="UnitTests\ProductOptionRepositoryUnitTests.cs" />
-    <Compile Include="UnitTests\ProductRepositoryUnitTests.cs" />
+    <Compile Include="NinjectTestBase.cs" />
+    <Compile Include="TestBase.cs" />
+    <Compile Include="UnitTests\EntityComparerUnitTests.cs" />
+    <Compile Include="UnitTests\ModelComparerUnitTests.cs" />
+    <Compile Include="UnitTests\ProductOptionRepositoryUnitTestsUsingMocks.cs" />
+    <Compile Include="UnitTests\ProductRepositoryUnitTestsUsingMocks.cs" />
     <Compile Include="SampleData.cs" />
     <Compile Include="SampleModels.cs" />
-    <Compile Include="UnitTests\ProductsControllerUnitTests.cs" />
-    <Compile Include="IntegrationTests\RefactionServiceIntegrationTests.cs" />
+    <Compile Include="UnitTests\ProductsControllerUnitTestsUsingMocks.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

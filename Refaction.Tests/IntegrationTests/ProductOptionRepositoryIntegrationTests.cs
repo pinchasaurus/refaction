@@ -17,10 +17,10 @@ using Ninject;
 namespace Refaction.Tests.UnitTests
 {
     /// <summary>
-    /// Unit tests for 100% code-coverage of ProductOptionRepository
+    /// Integration tests for 100% code-coverage of ProductOptionRepository
     /// </summary>
     [TestClass]
-    public class ProductOptionRepositoryUnitTests : RefactionUnitTestBase
+    public class ProductOptionRepositoryIntegrationTests : RefactionTestUsingFakesBase
     {
         ProductOptionRepository CurrentProductOptionsRepository
         {
@@ -51,18 +51,15 @@ namespace Refaction.Tests.UnitTests
 
             var productOptionEntity = productOptionEntities[0];
 
-            var entity = ProductOptionRepository.ModelSelectorFunc(productOptionEntity);
+            var createdModel = ProductOptionRepository.ModelSelectorFunc(productOptionEntity);
 
-            Assert.AreEqual(model.Description, entity.Description);
-            Assert.AreEqual(model.Id, entity.Id);
-            Assert.AreEqual(model.Name, entity.Name);
-            Assert.AreEqual(model.ProductId, entity.ProductId);
+            Assert.IsTrue(ModelComparer.AreEquivalent(model, createdModel));
         }
 
         [TestMethod]
         public void ProductOptionRepository_RetrieveAllProductOptionsUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var productOptions =
                 CurrentProductOptionsRepository.Retrieve()
@@ -79,7 +76,7 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductOptionRepository_RetrieveProductOptionByIdUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var model = CurrentProductOptionsRepository.Retrieve(SampleModels.ProductOption1.Id);
 
@@ -99,7 +96,7 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductOptionRepository_RetrieveProductOptionByProductIdUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var productOptions = CurrentProductOptionsRepository.RetrieveByProductId(SampleModels.Product0.Id);
 
@@ -126,7 +123,7 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductOptionRepository_RetrieveProductOptionByBothIdsUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var productId = SampleModels.Product1.Id;
 
@@ -151,7 +148,7 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductOptionRepository_UpdateProductOption()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var productOption = new ProductOption(SampleModels.ProductOption1);
 
@@ -180,7 +177,7 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductOptionRepository_DeleteProductOptionUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             CurrentProductOptionsRepository.Delete(SampleModels.ProductOption1);
 
@@ -215,7 +212,7 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductOptionRepository_ExistsProductUsingSampleData_ShouldReturnTrue()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var result = CurrentProductOptionsRepository.Exists(SampleModels.ProductOption1.Id);
 

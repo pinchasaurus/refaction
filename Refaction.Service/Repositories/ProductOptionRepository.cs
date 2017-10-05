@@ -13,7 +13,10 @@ using System.Web.Http;
 
 namespace Refaction.Service.Repositories
 {
-    public class ProductOptionRepository : RepositoryBase<ProductOption, Guid>
+    /// <summary>
+    /// CRUD operations for ProductOption models
+    /// </summary>
+    public class ProductOptionRepository : RepositoryBase<ProductOption, Guid>, IProductOptionRepository
     {
         protected IRefactionDbContext _db;
 
@@ -36,9 +39,7 @@ namespace Refaction.Service.Repositories
 
             _db.ProductOptionEntities.Add(productOption);
         }
-
-
-
+        
         public override IEnumerable<ProductOption> Retrieve()
         {
             return
@@ -52,7 +53,9 @@ namespace Refaction.Service.Repositories
         {
             ProductOption result;
 
-            var productOption = _db.ProductOptionEntities.SingleOrDefault(entity => entity.Id == id);
+            var productOption = 
+                _db.ProductOptionEntities
+                .SingleOrDefault(entity => entity.Id == id);
 
             if (productOption == null)
             {
@@ -89,7 +92,6 @@ namespace Refaction.Service.Repositories
             ;
         }
 
-
         public override void Update(ProductOption model)
         {
             var productOption = _db.ProductOptionEntities.Find(model.Id);
@@ -103,7 +105,6 @@ namespace Refaction.Service.Repositories
             productOption.Name = model.Name;
             productOption.ProductId = model.ProductId;
         }
-
 
         public override void Delete(Guid id)
         {
@@ -122,15 +123,12 @@ namespace Refaction.Service.Repositories
             Delete(model.Id);
         }
 
-
-
         public override bool Exists(Guid id)
         {
             return _db.ProductOptionEntities.Any(entity => entity.Id == id);
         }
 
-
-
+        // Expression for converting an entity into a model
         public readonly static Expression<Func<ProductOptionEntity, ProductOption>> ModelSelectorExpression =
             (ProductOptionEntity entity) =>
                 new ProductOption()
@@ -141,6 +139,7 @@ namespace Refaction.Service.Repositories
                     ProductId = entity.ProductId,
                 };
 
+        // Function for converting an entity into a model (compiled from expression)
         public readonly static Func<ProductOptionEntity, ProductOption> ModelSelectorFunc = ModelSelectorExpression.Compile();
     }
 }

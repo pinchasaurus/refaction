@@ -12,7 +12,7 @@ namespace Refaction.Data.Fakes
     /// <summary>
     /// An in-memory DbSet for testing Entity Framework per https://romiller.com/2012/02/14/testing-with-a-fake-dbcontext
     /// </summary>
-    public class FakeDbSet<T> : IDbSet<T>
+    public abstract class FakeDbSet<T> : IDbSet<T>
         where T : class
     {
         ObservableCollection<T> _data;

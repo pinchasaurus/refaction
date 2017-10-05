@@ -10,6 +10,7 @@ namespace Refaction.Common.Patterns
 {
     /// <summary>
     /// Abstract base class for all repositories
+    /// Mediates between the domain and data mapping layers using a collection-like interface for accessing domain objects.
     /// </summary>
     /// <remarks>Per https://martinfowler.com/eaaCatalog/repository.html</remarks>
     /// <typeparam name="TModel">The type of the model class for the repository</typeparam>

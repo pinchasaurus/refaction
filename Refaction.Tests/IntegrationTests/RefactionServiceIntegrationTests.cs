@@ -12,15 +12,23 @@ using Refaction.Data.Fakes;
 using Refaction.Common;
 using Refaction.Service;
 using Refaction.Tests;
+using Refaction.Service.Repositories;
 
 namespace Refaction.UnitTests.UnitTests
 {
+    /// <summary>
+    /// End-to-end testing of Refaction Web API service 
+    /// using OWIN test server and FakeRefactionDbContext (in memory)
+    /// </summary>
     [TestClass]
-    public class RefactionServiceIntegrationTests : RefactionUnitTestBase
+    public class RefactionServiceIntegrationTests : RefactionTestUsingFakesBase
     {
         TestServer _server;
         HttpClient _client;
 
+        /// <summary>
+        /// For each test, spin up an OWIN test server and connect an HTTP client to it
+        /// </summary>
         [TestInitialize]
         public void Initialize()
         {
@@ -31,10 +39,14 @@ namespace Refaction.UnitTests.UnitTests
         [TestCleanup]
         public void Cleanup()
         {
+            Dispose();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
             _client.Dispose();
             _server.Dispose();
         }
-
 
         [TestMethod]
         public void RefactionService_CreateProductUsingEmptyDatabase()
@@ -61,19 +73,17 @@ namespace Refaction.UnitTests.UnitTests
             var productsArray = products.Items.ToArray();
             Assert.IsTrue(productsArray.Length == 1);
 
-            // the returned product id will never match, so verify each field independently
+            // verify the created product
             var createdProduct = productsArray[0];
-            Assert.AreEqual(submittedProduct.DeliveryPrice, createdProduct.DeliveryPrice);
-            Assert.AreEqual(submittedProduct.Description, createdProduct.Description);
             Assert.AreNotEqual(submittedProduct.Id, createdProduct.Id);
-            Assert.AreEqual(submittedProduct.Name, createdProduct.Name);
-            Assert.AreEqual(submittedProduct.Price, createdProduct.Price);
+            createdProduct.Id = submittedProduct.Id;
+            Assert.IsTrue(ModelComparer.AreEquivalent(submittedProduct, createdProduct));
         }
 
         [TestMethod]
         public void RefactionService_CreateProductUsingSampleDatabase()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var submittedProduct =
                 new Product
@@ -98,13 +108,10 @@ namespace Refaction.UnitTests.UnitTests
             Assert.IsTrue(ModelComparer.AreEquivalent(SampleModels.Product1, productsArray[1]));
             Assert.IsTrue(ModelComparer.AreEquivalent(SampleModels.Product2, productsArray[2]));
 
-            // the returned product id will never match, so verify each field independently
             var createdProduct = productsArray[3];
-            Assert.AreEqual(submittedProduct.DeliveryPrice, createdProduct.DeliveryPrice);
-            Assert.AreEqual(submittedProduct.Description, createdProduct.Description);
             Assert.AreNotEqual(submittedProduct.Id, createdProduct.Id);
-            Assert.AreEqual(submittedProduct.Name, createdProduct.Name);
-            Assert.AreEqual(submittedProduct.Price, createdProduct.Price);
+            createdProduct.Id = submittedProduct.Id;
+            Assert.IsTrue(ModelComparer.AreEquivalent(submittedProduct, createdProduct));
         }
 
         [TestMethod]
@@ -123,7 +130,7 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void RefactionService_GetAllProductsUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var response = _client.GetAsync("http://testserver/products").Result;
             Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.OK);
@@ -148,7 +155,7 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void RefactionService_GetProductByIdUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var response = _client.GetAsync($"http://testserver/products/{SampleModels.Product1.Id}").Result;
             Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.OK);
@@ -173,7 +180,7 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void RefactionService_GetProductsByNameUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var response = _client.GetAsync("http://testserver/products?name=1").Result;
             Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.OK);
@@ -199,7 +206,7 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void RefactionService_UpdateProductUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var submittedProduct = SampleModels.Product1;
             submittedProduct.DeliveryPrice = 1234.56M;
@@ -226,7 +233,7 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void RefactionService_DeleteProductUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var response = _client.DeleteAsync($"http://testserver/products/{SampleModels.Product1.Id}").Result;
             Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.NoContent);
@@ -260,17 +267,16 @@ namespace Refaction.UnitTests.UnitTests
                     Description = "The created product option",
                     Id = Guid.NewGuid(),
                     Name = "ProductOption 5",
-                    ProductId = SampleModels.Product0.Id
                 };
 
-            var response = _client.PostAsJsonAsync($"http://testserver/product/{submittedProductOption.ProductId}/options", submittedProductOption).Result;
+            var response = _client.PostAsJsonAsync($"http://testserver/product/{SampleModels.Product0.Id}/options", submittedProductOption).Result;
             Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.NotFound);
         }
 
         [TestMethod]
         public void RefactionService_CreateProductOptionUsingSampleDatabase()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var submittedProductOption =
                 new ProductOption
@@ -291,16 +297,22 @@ namespace Refaction.UnitTests.UnitTests
 
             var productOptions = retrieveResponse.Content.ReadAsAsync<ProductOptions>().Result;
             var productOptionsArray = productOptions.Items.ToArray();
+
+            // by design, the product id for the product options model will never be serialized
+            // force the product id assignment here...
+            foreach (var productOption in productOptionsArray)
+            {
+                productOption.ProductId = submittedProductOption.ProductId;
+            }
+
             Assert.IsTrue(productOptionsArray.Length == 3);
             Assert.IsTrue(ModelComparer.AreEquivalent(SampleModels.ProductOption0, productOptionsArray[0]));
             Assert.IsTrue(ModelComparer.AreEquivalent(SampleModels.ProductOption2, productOptionsArray[1]));
 
-            // the returned productOption id will never match, so verify each field independently
             var createdProductOption = productOptionsArray[2];
-            Assert.AreEqual(submittedProductOption.Description, createdProductOption.Description);
             Assert.AreNotEqual(submittedProductOption.Id, createdProductOption.Id);
-            Assert.AreEqual(submittedProductOption.Name, createdProductOption.Name);
-            Assert.AreEqual(submittedProductOption.ProductId, createdProductOption.ProductId);
+            createdProductOption.Id = submittedProductOption.Id;
+            Assert.IsTrue(ModelComparer.AreEquivalent(submittedProductOption, createdProductOption));
         }
 
         [TestMethod]
@@ -319,13 +331,21 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void RefactionService_GetProductOptionsUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var response = _client.GetAsync($"http://testserver/products/{SampleModels.Product1.Id}/options").Result;
             Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.OK);
 
             var productOptions = response.Content.ReadAsAsync<ProductOptions>().Result;
             var productOptionsArray = productOptions.Items.ToArray();
+
+            // by design, the product id for the product options model will never be serialized
+            // force the product id assignment here...
+            foreach (var productOption in productOptionsArray)
+            {
+                productOption.ProductId = SampleModels.Product1.Id;
+            }
+
             Assert.IsTrue(productOptionsArray.Length == 2);
             Assert.IsTrue(ModelComparer.AreEquivalent(SampleModels.ProductOption1, productOptionsArray[0]), "ProductOption1");
             Assert.IsTrue(ModelComparer.AreEquivalent(SampleModels.ProductOption3, productOptionsArray[1]), "ProductOption3");
@@ -343,12 +363,17 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void RefactionService_GetProductOptionByBothIdsUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var response = _client.GetAsync($"http://testserver/products/{SampleModels.Product1.Id}/options/{SampleModels.ProductOption3.Id}").Result;
             Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.OK);
 
             var productOption = response.Content.ReadAsAsync<ProductOption>().Result;
+
+            // by design, the product id for the product options model will never be serialized
+            // force the product id assignment here...
+            productOption.ProductId = SampleModels.Product1.Id;
+
             Assert.IsTrue(ModelComparer.AreEquivalent(SampleModels.ProductOption3, productOption));
         }
 
@@ -360,14 +385,14 @@ namespace Refaction.UnitTests.UnitTests
             var submittedProductOption = SampleModels.ProductOption1;
             submittedProductOption.Name = "The updated product option";
 
-            var response = _client.PutAsJsonAsync<ProductOption>($"http://testserver/products/{submittedProductOption.ProductId}/options/{submittedProductOption.Id}", submittedProductOption).Result;
+            var response = _client.PutAsJsonAsync<ProductOption>($"http://testserver/products/{SampleModels.Product1.Id}/options/{submittedProductOption.Id}", submittedProductOption).Result;
             Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.NotFound);
         }
 
         [TestMethod]
         public void RefactionService_UpdateProductOptionUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var submittedProductOption = SampleModels.ProductOption1;
             submittedProductOption.Name = "The updated product option";
@@ -379,6 +404,11 @@ namespace Refaction.UnitTests.UnitTests
             Assert.IsTrue(updatedResponse.StatusCode == System.Net.HttpStatusCode.OK);
 
             var updatedProductOption = updatedResponse.Content.ReadAsAsync<ProductOption>().Result;
+
+            // by design, the product id for the product options model will never be serialized
+            // force the product id assignment here...
+            updatedProductOption.ProductId = submittedProductOption.ProductId;
+
             Assert.IsTrue(ModelComparer.AreEquivalent(submittedProductOption, updatedProductOption));
         }
 
@@ -394,7 +424,7 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void RefactionService_DeleteProductOptionUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var response = _client.DeleteAsync($"http://testserver/products/{SampleModels.Product1.Id}/options/{SampleModels.ProductOption1.Id}").Result;
             Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.NoContent);
@@ -404,6 +434,14 @@ namespace Refaction.UnitTests.UnitTests
 
             var productOptions = retrieveResponse.Content.ReadAsAsync<ProductOptions>().Result;
             var productOptionsArray = productOptions.Items.ToArray();
+
+            // by design, the product id for the product options model will never be serialized
+            // force the product id assignment here...
+            foreach (var productOption in productOptionsArray)
+            {
+                productOption.ProductId = SampleModels.Product1.Id;
+            }
+
             Assert.IsTrue(productOptionsArray.Length == 1);
             Assert.IsTrue(ModelComparer.AreEquivalent(SampleModels.ProductOption3, productOptionsArray[0]));
         }

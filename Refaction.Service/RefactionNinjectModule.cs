@@ -7,26 +7,33 @@ using Ninject.Modules;
 using Refaction.Data;
 using Refaction.Data.Fakes;
 using Refaction.Common;
+using Refaction.Service.Repositories;
 
 namespace Refaction.Service
 {
+    /// <summary>
+    /// Initializes Ninject kernel
+    /// </summary>
     public class RefactionNinjectModule : NinjectModule
     {
         public override void Load()
         {
-            NinjectHelper.RemovePriorBindings(this.Kernel, typeof(IRefactionDbContext));
-
-            this.Bind<IRefactionDbContext>().To<RefactionDbContext>();
+            this.Rebind<IRefactionDbContext>()
+                .To<RefactionDbContext>();
 
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
             {
-                NinjectHelper.RemovePriorBindings(this.Kernel, typeof(IRefactionDbContext));
-
-                this.Bind<IRefactionDbContext>().To<FakeRefactionDbContext>();
+                this.Rebind<IRefactionDbContext>()
+                    .To<FakeRefactionDbContext>();
             }
 #endif
 
+            this.Rebind<IProductRepository>()
+                .To<ProductRepository>();
+
+            this.Rebind<IProductOptionRepository>()
+                .To<ProductOptionRepository>();
         }
     }
 }

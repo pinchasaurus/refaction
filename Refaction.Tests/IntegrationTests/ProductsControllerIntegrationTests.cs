@@ -1,5 +1,4 @@
-﻿using Refaction.Service.Controllers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,14 +10,16 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Refaction.Service;
 using Refaction.Tests;
 using System.Diagnostics;
+using Refaction.Service.Controllers;
+using Refaction.Service.Repositories;
 
 namespace Refaction.UnitTests.UnitTests
 {
     /// <summary>
-    /// Unit tests for 100% code-coverage of ProductsController
+    /// Integration tests for 100% code-coverage of ProductsController
     /// </summary>
     [TestClass]
-    public class ProductsControllerUnitTests : RefactionUnitTestBase
+    public class ProductsControllerIntegrationTests : RefactionTestUsingFakesBase
     {
         public ProductsController CurrentProductsController
         {
@@ -50,7 +51,7 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void ProductsController_CreateProductUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var product =
                 new Product
@@ -84,7 +85,7 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void ProductsController_RetrieveAllProductsUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var products = CurrentProductsController.GetAllProducts();
 
@@ -109,7 +110,7 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void ProductsController_RetrieveProductByIdUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var product = CurrentProductsController.GetProduct(SampleModels.Product0.Id);
 
@@ -131,7 +132,7 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void ProductsController_RetrieveProductByNameUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var products = CurrentProductsController.GetProductsByName("0");
 
@@ -156,7 +157,7 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void ProductsController_UpdateUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var product = SampleModels.Product0;
             product.DeliveryPrice = 1234.56M;
@@ -183,7 +184,7 @@ namespace Refaction.UnitTests.UnitTests
         [ExpectedException(typeof(HttpResponseException_NotFoundException))]
         public void ProductsController_DeleteUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var product = SampleModels.Product0;
 
@@ -237,7 +238,7 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void ProductOptionsController_RetrieveProductOptionsByProductIdUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var productOptions = CurrentProductsController.GetOptions(SampleModels.Product0.Id);
 
@@ -261,7 +262,7 @@ namespace Refaction.UnitTests.UnitTests
         [TestMethod]
         public void ProductOptionsController_RetrieveProductOptionsByBothIdsUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var productOption = CurrentProductsController.GetOption(SampleModels.Product0.Id, SampleModels.ProductOption0.Id);
 
@@ -277,18 +278,18 @@ namespace Refaction.UnitTests.UnitTests
             var productOption = SampleModels.ProductOption0;
             productOption.Name = "The updated product option";
 
-            CurrentProductsController.UpdateOption(productOption.Id, productOption);
+            CurrentProductsController.UpdateOption(productOption.ProductId, productOption.Id, productOption);
         }
 
         [TestMethod]
         public void ProductOptionsController_UpdateUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var productOption = SampleModels.ProductOption0;
             productOption.Name = "The updated product option";
 
-            CurrentProductsController.UpdateOption(productOption.Id, productOption);
+            CurrentProductsController.UpdateOption(productOption.ProductId, productOption.Id, productOption);
 
             var updatedProductOption = CurrentProductsController.GetOption(productOption.ProductId, productOption.Id);
 
@@ -310,7 +311,7 @@ namespace Refaction.UnitTests.UnitTests
         [ExpectedException(typeof(HttpResponseException_NotFoundException))]
         public void ProductOptionsController_DeleteUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var productOption = SampleModels.ProductOption0;
 
@@ -332,7 +333,7 @@ namespace Refaction.UnitTests.UnitTests
             UseEmptyDatabase();
 
             // ensure 100% code coverage
-            var controller = new ProductsController(CurrentDbContext);
+            var controller = new ProductsController(CurrentDbContext, new ProductRepository(CurrentDbContext), new ProductOptionRepository(CurrentDbContext));
             controller.Dispose();
         }
 

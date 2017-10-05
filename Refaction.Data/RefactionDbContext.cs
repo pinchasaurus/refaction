@@ -7,6 +7,9 @@ using Refaction.Data.Entities;
 
 namespace Refaction.Data
 {
+    /// <summary>
+    /// Entity Framework context for Refaction database entities
+    /// </summary>
     public partial class RefactionDbContext : DbContext, IRefactionDbContext
     {
         public RefactionDbContext()
@@ -17,6 +20,7 @@ namespace Refaction.Data
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
             {
+                // Output generated sql to debug window
                 this.Database.Log = (text) => System.Diagnostics.Debug.WriteLine(text);
             }
 #endif
@@ -31,7 +35,6 @@ namespace Refaction.Data
             // Map the table names here so the entity classes do not depend on System.Data.Entity
             modelBuilder.Entity<ProductEntity>().ToTable("Product");
             modelBuilder.Entity<ProductOptionEntity>().ToTable("ProductOption");
-
         }
     }
 }

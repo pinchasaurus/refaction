@@ -18,19 +18,20 @@ namespace Refaction.Service.Controllers
         // create new db and repository for every request
         IRefactionDbContext _db;
 
-        ProductRepository _products;
-        ProductOptionRepository _productOptions;
+        IProductRepository _productRepository;
+        IProductOptionRepository _productOptionRepository;
 
         public ProductsController()
         {
         }
 
-        public ProductsController(IRefactionDbContext db)
+        public ProductsController(IRefactionDbContext db, IProductRepository productRepository, IProductOptionRepository productOptionRepository)
         {
+            // These dependencies are injected by Ninject
             _db = db;
 
-            _products = new ProductRepository(_db);
-            _productOptions = new ProductOptionRepository(_db);
+            _productRepository = productRepository;
+            _productOptionRepository = productOptionRepository;
         }
 
         protected override void Dispose(bool disposing)
@@ -39,8 +40,8 @@ namespace Refaction.Service.Controllers
             {
                 _db.SaveChanges();
 
-                _products.Dispose();
-                _productOptions.Dispose();
+                _productRepository.Dispose();
+                _productOptionRepository.Dispose();
 
                 _db.Dispose();
             }
@@ -52,7 +53,7 @@ namespace Refaction.Service.Controllers
         [HttpGet]
         public Products GetAllProducts()
         {
-            var items = _products.Retrieve();
+            var items = _productRepository.Retrieve();
 
             return new Products(items);
         }
@@ -61,7 +62,7 @@ namespace Refaction.Service.Controllers
         [HttpGet]
         public Products GetProductsByName(string name)
         {
-            var items = _products.Retrieve(name);
+            var items = _productRepository.Retrieve(name);
 
             return new Products(items);
         }
@@ -70,7 +71,7 @@ namespace Refaction.Service.Controllers
         [HttpGet]
         public Product GetProduct(Guid id)
         {
-            var result = _products.Retrieve(id);
+            var result = _productRepository.Retrieve(id);
 
             if (result == null)
             {
@@ -88,7 +89,7 @@ namespace Refaction.Service.Controllers
         {
             product.Id = Guid.NewGuid();
 
-            _products.Create(product);
+            _productRepository.Create(product);
         }
 
         [Route("{id}")]
@@ -97,21 +98,21 @@ namespace Refaction.Service.Controllers
         {
             product.Id = id;
 
-            _products.Update(product);
+            _productRepository.Update(product);
         }
 
         [Route("{id}")]
         [HttpDelete]
         public void DeleteProduct(Guid id)
         {
-            _products.Delete(id);
+            _productRepository.Delete(id);
         }
 
         [Route("{productId}/options")]
         [HttpGet]
         public ProductOptions GetOptions(Guid productId)
         {
-            var items = _productOptions.RetrieveByProductId(productId);
+            var items = _productOptionRepository.RetrieveByProductId(productId);
 
             return new ProductOptions(items);
         }
@@ -121,7 +122,7 @@ namespace Refaction.Service.Controllers
         public ProductOption GetOption(Guid productId, Guid id)
         {
             var result =
-                _productOptions
+                _productOptionRepository
                 .RetrieveByBothIds(productId, id);
 
             if (result == null)
@@ -141,23 +142,24 @@ namespace Refaction.Service.Controllers
             option.Id = Guid.NewGuid();
             option.ProductId = productId;
 
-            _productOptions.Create(option);
+            _productOptionRepository.Create(option);
         }
 
         [Route("{productId}/options/{id}")]
         [HttpPut]
-        public void UpdateOption(Guid id, ProductOption option)
+        public void UpdateOption(Guid productId, Guid id, ProductOption option)
         {
             option.Id = id;
+            option.ProductId = productId;
 
-            _productOptions.Update(option);
+            _productOptionRepository.Update(option);
         }
 
         [Route("{productId}/options/{id}")]
         [HttpDelete]
         public void DeleteOption(Guid id)
         {
-            _productOptions.Delete(id);
+            _productOptionRepository.Delete(id);
         }
 
     }

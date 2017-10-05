@@ -13,8 +13,6 @@ namespace Refaction.Tests
     /// </summary>
     public static class SampleData
     {
-        // To prevent modification of the sample entities, always return a copy of the underlying entities
-
         internal static readonly ProductEntity[] ProductEntities = new ProductEntity[]
         {
             new ProductEntity
@@ -43,6 +41,7 @@ namespace Refaction.Tests
             },
         };
 
+        // To prevent modification of the sample entities, always return a copy of the underlying entities
         internal static ProductEntity ProductEntity0 { get { return FakeRefactionDbContext.CreateCopy(ProductEntities[0]); } }
         internal static ProductEntity ProductEntity1 { get { return FakeRefactionDbContext.CreateCopy(ProductEntities[1]); } }
         internal static ProductEntity ProductEntity2 { get { return FakeRefactionDbContext.CreateCopy(ProductEntities[2]); } }
@@ -78,6 +77,8 @@ namespace Refaction.Tests
                 ProductId = SampleData.ProductEntity1.Id,
             },
         };
+
+        // To prevent modification of the sample entities, always return a copy of the underlying entities
 
         internal static ProductOptionEntity ProductOptionEntity0 { get { return FakeRefactionDbContext.CreateCopy(ProductOptionEntities[0]); } }
         internal static ProductOptionEntity ProductOptionEntity1 { get { return FakeRefactionDbContext.CreateCopy(ProductOptionEntities[1]); } }

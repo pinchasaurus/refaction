@@ -11,7 +11,10 @@ using Refaction.Common;
 
 namespace Refaction.UnitTests
 {
-    public abstract class NinjectUnitTestBase : UnitTestBase
+    /// <summary>
+    /// Creates a Ninject Kernel for derived test classes
+    /// </summary>
+    public abstract partial class NinjectTestBase : TestBase
     {
         private IKernel _ninjectKernel;
 
@@ -20,19 +23,10 @@ namespace Refaction.UnitTests
             get { return _ninjectKernel; }
         }
 
-        public NinjectUnitTestBase()
+        public NinjectTestBase()
         {
             _ninjectKernel = new StandardKernel();
             _ninjectKernel.Load(Assembly.GetExecutingAssembly());
         }
-
-        /// <summary>
-        /// Removes Ninject bindings for IRefactionDbContext
-        /// </summary>
-        protected void RemovePriorBindings(Type service)
-        {
-            NinjectHelper.RemovePriorBindings(NinjectKernel, service);
-        }
-
     }
 }

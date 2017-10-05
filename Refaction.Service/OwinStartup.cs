@@ -18,6 +18,9 @@ using Refaction.Data.Fakes;
 
 namespace Refaction.Service
 {
+    /// <summary>
+    /// Startup class for OWIN server
+    /// </summary>
     public class OwinStartup
     {
         public static IKernel NinjectKernel;
@@ -39,6 +42,8 @@ namespace Refaction.Service
 
         private static IKernel GetOrCreateKernel()
         {
+            // During testing, the Ninject kernel will be assigned by the test layer.
+            // If the Ninject kernel has not been assigned, then we need to create one.
             if (NinjectKernel == null)
             {
                 var kernel = new StandardKernel();

@@ -12,12 +12,19 @@ using Refaction.Tests;
 using Refaction.Data.Fakes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Refaction.Data.Entities;
+using Refaction.Service.Repositories;
 
 namespace Refaction.UnitTests
 {
-    public abstract class RefactionUnitTestBase : NinjectUnitTestBase
+    /// <summary>
+    /// Creates an IRefactionDbContext for derived classes
+    /// </summary>
+    /// <remarks>
+    /// Designed for use with integration tests (uses in-memory Fakes)
+    /// </remarks>
+    public abstract class RefactionTestUsingFakesBase : NinjectTestBase
     {
-        public RefactionUnitTestBase()
+        public RefactionTestUsingFakesBase()
         {
             Refaction.Service.OwinStartup.NinjectKernel = this.NinjectKernel;
         }
@@ -27,25 +34,38 @@ namespace Refaction.UnitTests
             get { return NinjectKernel.Get<IRefactionDbContext>(); }
         }
 
-        public void UseEmptyDatabase()
+        protected virtual void UseEmptyDatabase()
         {
-            RemovePriorBindings(typeof(IRefactionDbContext));
-
-            NinjectKernel.Bind<IRefactionDbContext>()
+            NinjectKernel.Rebind<IRefactionDbContext>()
                 .To<FakeRefactionDbContext>()
                 .InSingletonScope();
+
+            RebindRepositories();
         }
 
-        protected void UseDatabaseWithSampleData()
+        protected virtual void UseSampleDatabase()
         {
-            RemovePriorBindings(typeof(IRefactionDbContext));
-
-            NinjectKernel.Bind<IRefactionDbContext>()
+            NinjectKernel.Rebind<IRefactionDbContext>()
                 .To<FakeRefactionDbContext>()
                 .InSingletonScope()
                 .WithConstructorArgument<IEnumerable<ProductEntity>>(SampleData.ProductEntities)
                 .WithConstructorArgument<IEnumerable<ProductOptionEntity>>(SampleData.ProductOptionEntities)
                 ;
+
+            RebindRepositories();
+        }
+
+        public void RebindRepositories()
+        {
+            NinjectKernel
+            .Rebind<IProductRepository>()
+            .To<ProductRepository>()
+            .InSingletonScope();
+
+            NinjectKernel
+            .Rebind<IProductOptionRepository>()
+            .To<ProductOptionRepository>()
+            .InSingletonScope();
         }
     }
 }

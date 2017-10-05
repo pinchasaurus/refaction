@@ -14,7 +14,10 @@ using Refaction.Data.Entities;
 
 namespace Refaction.Service.Repositories
 {
-    public class ProductRepository : RepositoryBase<Product, Guid>
+    /// <summary>
+    /// CRUD operations for Product models
+    /// </summary>
+    public class ProductRepository : RepositoryBase<Product, Guid>, IProductRepository
     {
         protected IRefactionDbContext _db;
 
@@ -22,7 +25,6 @@ namespace Refaction.Service.Repositories
         {
             _db = db;
         }
-        
 
         public override void Create(Product model)
         {
@@ -39,8 +41,6 @@ namespace Refaction.Service.Repositories
 
             _db.ProductEntities.Add(product);
         }
-
-
 
         public override IEnumerable<Product> Retrieve()
         {
@@ -98,11 +98,12 @@ namespace Refaction.Service.Repositories
             product.Name = model.Name;
             product.Price = model.Price;
         }
-
-
+        
         public override void Delete(Guid id)
         {
-            var product = _db.ProductEntities.SingleOrDefault(entity => entity.Id == id);
+            var product = 
+                _db.ProductEntities
+                .SingleOrDefault(entity => entity.Id == id);
 
             if (product == null)
             {
@@ -123,20 +124,17 @@ namespace Refaction.Service.Repositories
             // delete product
             _db.ProductEntities.Remove(product);
         }
-
-        public override void Delete(Product model)
+                public override void Delete(Product model)
         {
             Delete(model.Id);
         }
-
-
-
+        
         public override bool Exists(Guid id)
         {
             return _db.ProductEntities.Any(entity => entity.Id == id);
         }
-
-
+        
+        // Expression for converting an entity into a model
         public readonly static Expression<Func<ProductEntity, Product>> ModelSelectorExpression =
             (ProductEntity entity) =>
                 new Product()
@@ -148,6 +146,7 @@ namespace Refaction.Service.Repositories
                     Price = entity.Price,
                 };
 
+        // Expression for converting an entity into a model
         public readonly static Func<ProductEntity, Product> ModelSelectorFunc = ModelSelectorExpression.Compile();
     }
 }

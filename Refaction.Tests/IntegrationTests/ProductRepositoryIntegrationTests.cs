@@ -19,10 +19,10 @@ using Ninject.Parameters;
 namespace Refaction.Tests.UnitTests
 {
     /// <summary>
-    /// Unit tests for 100% code-coverage of ProductRepository
+    /// Integration tests for 100% code-coverage of ProductRepository
     /// </summary>
     [TestClass]
-    public class ProductRepositoryUnitTests : RefactionUnitTestBase
+    public class ProductRepositoryIntegrationTests : RefactionTestUsingFakesBase
     {
         ProductRepository CurrentProductRepository
         {
@@ -34,7 +34,7 @@ namespace Refaction.Tests.UnitTests
         {
             UseEmptyDatabase();
 
-            var newProduct =
+            var submittedProduct =
                 new Product
                 {
                     Id = Guid.NewGuid(),
@@ -44,7 +44,7 @@ namespace Refaction.Tests.UnitTests
                     Price = 3.33M
                 };
 
-            CurrentProductRepository.Create(newProduct);
+            CurrentProductRepository.Create(submittedProduct);
 
             var productEntities = CurrentDbContext.ProductEntities.Local;
 
@@ -52,19 +52,16 @@ namespace Refaction.Tests.UnitTests
 
             var productEntity = productEntities[0];
 
-            var entity = ProductRepository.ModelSelectorFunc(productEntity);
+            var createdProduct = ProductRepository.ModelSelectorFunc(productEntity);
 
-            Assert.AreEqual(newProduct.DeliveryPrice, entity.DeliveryPrice);
-            Assert.AreEqual(newProduct.Description, entity.Description);
-            Assert.AreEqual(newProduct.Id, entity.Id);
-            Assert.AreEqual(newProduct.Name, entity.Name);
-            Assert.AreEqual(newProduct.Price, entity.Price);
+
+            Assert.IsTrue(ModelComparer.AreEquivalent(submittedProduct, createdProduct));
         }
 
         [TestMethod]
         public void ProductRepository_RetrieveAllProductsUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var products =
                 CurrentProductRepository.Retrieve()
@@ -80,7 +77,7 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductRepository_RetrieveProductByIdUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var product = CurrentProductRepository.Retrieve(SampleModels.Product1.Id);
 
@@ -100,7 +97,7 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductRepository_RetrieveProductByNameUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var products = CurrentProductRepository.Retrieve("1");
 
@@ -114,7 +111,7 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductRepository_UpdateProduct()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var product = new Product(SampleModels.Product1);
             product.DeliveryPrice = 1234.56M;
@@ -142,7 +139,7 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductRepository_DeleteProductUsingSampleData()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             CurrentProductRepository.Delete(SampleModels.Product1);
 
@@ -184,7 +181,7 @@ namespace Refaction.Tests.UnitTests
         [TestMethod]
         public void ProductRepository_ExistsProductUsingSampleData_ShouldReturnTrue()
         {
-            UseDatabaseWithSampleData();
+            UseSampleDatabase();
 
             var exists = CurrentProductRepository.Exists(SampleModels.Product1.Id);
 

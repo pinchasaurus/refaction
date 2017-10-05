@@ -1,10 +1,11 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
+
+using Newtonsoft.Json;
 
 namespace Refaction.Service.Models
 {
@@ -16,6 +17,8 @@ namespace Refaction.Service.Models
 
         public Guid Id { get; set; }
 
+        // by design, this property should never be serialized by the json formatter
+        [JsonIgnore]
         public Guid ProductId { get; set; }
 
         [Required]
