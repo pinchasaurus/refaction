@@ -11,6 +11,9 @@ namespace Refaction.Service
             formatters.Remove(formatters.XmlFormatter);
             formatters.JsonFormatter.Indent = true;
 
+            // Do not send exception details to remote clients
+            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.LocalOnly;
+
             // Web API routes
             config.MapHttpAttributeRoutes();
 
