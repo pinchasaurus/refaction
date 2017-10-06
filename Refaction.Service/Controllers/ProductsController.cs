@@ -10,6 +10,8 @@ using Refaction.Service.Models;
 using Refaction.Service.Repositories;
 using Refaction.Data.Fakes;
 
+using NSwag.Annotations;
+
 namespace Refaction.Service.Controllers
 {
     [RoutePrefix("products")]
@@ -60,6 +62,7 @@ namespace Refaction.Service.Controllers
 
         [Route]
         [HttpGet]
+        [SwaggerIgnore] // Swagger does not support actions whose routes differ only by their query string
         public Products GetProductsByName(string name)
         {
             var items = _productRepository.Retrieve(name);
