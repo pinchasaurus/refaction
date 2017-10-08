@@ -40,6 +40,8 @@ I refactored the project as follows:
 
 * Added automatic generation of Swagger document using NSwag, and made Swagger UI the default page.
 
+* All controller actions return HttpActionResult and verify model state and parameters before proceeding.
+
 ## Comments
 
 If the original constraints were lifted, then I would migrate the project to Visual Studio 2017, enable database migrations, add a logging layer to record controller activity in a database (or other store), and work on upgrading the project to .NET Core and Entity Framework Core.  If performance was a concern, then I would also convert all controller actions to asynchronous methods to free up threads in the application pool.
