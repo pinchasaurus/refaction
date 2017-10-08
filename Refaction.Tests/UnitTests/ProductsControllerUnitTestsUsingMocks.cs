@@ -1,21 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Newtonsoft.Json;
 using Ninject;
-
+using Refaction.Common;
+using Refaction.Data;
 using Refaction.Service;
 using Refaction.Service.Controllers;
 using Refaction.Service.Models;
 using Refaction.Service.Repositories;
 using Refaction.Tests;
 using Refaction.UnitTests.Mocks;
-using Refaction.Data;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web.Http;
+using System.Web.Http.Results;
 
 namespace Refaction.UnitTests.UnitTests
 {
@@ -28,6 +31,7 @@ namespace Refaction.UnitTests.UnitTests
     {
         public MockProductRepository MockProductRepository;
         public MockProductOptionRepository MockProductOptionRepository;
+        protected ProductsController _currentProductsController;
 
         protected static readonly Product[] _emptyProductArray = new Product[] { };
         protected static readonly ProductOption[] _emptyProductOptionArray = new ProductOption[] { };
@@ -60,15 +64,21 @@ namespace Refaction.UnitTests.UnitTests
             .Rebind<IProductOptionRepository>()
             .ToConstant(this.MockProductOptionRepository.Object)
             .InSingletonScope();
+
+            var oldController = _currentProductsController;
+
+            _currentProductsController = NinjectKernel.Get<ProductsController>();
+
+            Assert.AreNotSame(oldController, _currentProductsController);
         }
 
         public ProductsController CurrentProductsController
         {
-            get { return NinjectKernel.Get<ProductsController>(); }
+            get { return _currentProductsController; }
         }
 
         [TestMethod]
-        public void ProductsController_CreateProductUsingEmptyDatabase()
+        public void ProductsController_CreateProduct_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -89,7 +99,10 @@ namespace Refaction.UnitTests.UnitTests
                 .Setup(m => m.Create(It.Is<Product>(v => ModelComparer.AreEquivalent(v, product))))
                 .Verifiable();
 
-            CurrentProductsController.CreateProduct(product);
+            var actionResult = CurrentProductsController.CreateProduct(product);
+
+            var contentResult = actionResult as OkResult;
+            Assert.IsNotNull(contentResult);
 
             // make sure that the new product id was assigned, and nothing else changed
             Assert.IsTrue(product.Id != copyOfProduct.Id);
@@ -103,7 +116,19 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void ProductsController_RetrieveAllProductsUsingEmptyDatabase()
+        public void ProductsController_CreateProduct_ReturnsBadRequestResult_WhenModelStateIsInvalid()
+        {
+            UseEmptyDatabase();
+
+            CurrentProductsController.ModelState.AddModelError("productId", "fakeError");
+            var actionResult = CurrentProductsController.CreateProduct(null);
+
+            var contentResult = actionResult as BadRequestResult;
+            Assert.IsNotNull(contentResult);
+        }
+
+        [TestMethod]
+        public void ProductsController_RetrieveAllProducts_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -113,9 +138,10 @@ namespace Refaction.UnitTests.UnitTests
                 .Returns(_emptyProductArray)
                 .Verifiable();
 
-            var products = CurrentProductsController.GetAllProducts();
+            var actionResult = CurrentProductsController.GetAllProducts();
 
-            Assert.IsTrue(products.Items.Count() == 0);
+            var contentResult = actionResult as OkNegotiatedContentResult<Products>;
+            Assert.IsNotNull(contentResult);
 
             // verify that retrieve method was called once
             this.MockProductRepository
@@ -124,7 +150,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void ProductsController_RetrieveAllProductsUsingSampleDatabase()
+        public void ProductsController_RetrieveAllProducts_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -134,12 +160,10 @@ namespace Refaction.UnitTests.UnitTests
                 .Returns(new Product[] { SampleModels.Product0, SampleModels.Product1, SampleModels.Product2 })
                 .Verifiable();
 
-            var products = CurrentProductsController.GetAllProducts();
-            var productsArray = products.Items.ToArray();
-            Assert.IsTrue(productsArray.Count() == 3);
-            Assert.IsTrue(ModelComparer.AreEquivalent(productsArray[0], SampleModels.Product0));
-            Assert.IsTrue(ModelComparer.AreEquivalent(productsArray[1], SampleModels.Product1));
-            Assert.IsTrue(ModelComparer.AreEquivalent(productsArray[2], SampleModels.Product2));
+            var actionResult = CurrentProductsController.GetAllProducts();
+
+            var contentResult = actionResult as OkNegotiatedContentResult<Products>;
+            Assert.IsNotNull(contentResult);
 
             // verify that retrieve method was called once
             this.MockProductRepository
@@ -148,22 +172,41 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpResponseException_NotFoundException))]
-        public void ProductsController_RetrieveProductByIdUsingEmptyDatabase_ShouldThrowNotFoundException()
+        public void ProductsController_RetrieveAllProducts_ReturnsBadRequestResult_WhenModelStateIsInvalid()
         {
             UseEmptyDatabase();
 
-            // expect call to retrieve method
+            CurrentProductsController.ModelState.AddModelError("productId", "fakeError");
+            var actionResult = CurrentProductsController.GetAllProducts();
+
+            var contentResult = actionResult as BadRequestResult;
+            Assert.IsNotNull(contentResult);
+        }
+
+        [TestMethod]
+        public void ProductsController_RetrieveProductById_UsingEmptyDatabase()
+        {
+            UseEmptyDatabase();
+
+            // expect retrieve method to be called
             this.MockProductRepository
                 .Setup(m => m.Retrieve(It.Is<Guid>(v => v == SampleModels.Product1.Id)))
                 .Returns((Product)null)
                 .Verifiable();
 
-            var product = CurrentProductsController.GetProduct(SampleModels.Product1.Id);
+            var actionResult = CurrentProductsController.GetProduct(SampleModels.Product1.Id);
+
+            var contentResult = actionResult as NotFoundResult;
+            Assert.IsNotNull(contentResult);
+
+            // verify retrieve method called once
+            this.MockProductRepository
+                .Verify(m => m.Retrieve(It.Is<Guid>(v => v == SampleModels.Product1.Id)),
+                Times.Once());
         }
 
         [TestMethod]
-        public void ProductsController_RetrieveProductByIdUsingSampleDatabase()
+        public void ProductsController_RetrieveProductById_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -173,9 +216,10 @@ namespace Refaction.UnitTests.UnitTests
                 .Returns(SampleModels.Product1)
                 .Verifiable();
 
-            var product = CurrentProductsController.GetProduct(SampleModels.Product1.Id);
+            var actionResult = CurrentProductsController.GetProduct(SampleModels.Product1.Id);
 
-            Assert.IsTrue(ModelComparer.AreEquivalent(product, SampleModels.Product1));
+            var contentResult = actionResult as OkNegotiatedContentResult<Product>;
+            Assert.IsNotNull(contentResult);
 
             // verify retrieve method called once
             this.MockProductRepository
@@ -184,7 +228,19 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void ProductsController_RetrieveProductByNameUsingEmptyDatabase_ShouldReturnZeroProducts()
+        public void ProductsController_RetrieveProductById_ReturnsBadRequestResult_WhenModelStatIsInvalid()
+        {
+            UseEmptyDatabase();
+
+            CurrentProductsController.ModelState.AddModelError("productId", "fakeError");
+            var actionResult = CurrentProductsController.GetProduct(Guid.Empty);
+
+            var contentResult = actionResult as BadRequestResult;
+            Assert.IsNotNull(contentResult);
+        }
+
+        [TestMethod]
+        public void ProductsController_RetrieveProductByName_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -194,7 +250,10 @@ namespace Refaction.UnitTests.UnitTests
                 .Returns(new Product[] { SampleModels.Product1 })
                 .Verifiable();
 
-            var products = CurrentProductsController.GetProductsByName("1");
+            var actionResult = CurrentProductsController.GetProductsByName("1");
+
+            var contentResult = actionResult as OkNegotiatedContentResult<Products>;
+            Assert.IsNotNull(contentResult);
 
             // verify retrieve method called once
             this.MockProductRepository
@@ -203,7 +262,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void ProductsController_RetrieveProductByNameUsingSampleDatabase()
+        public void ProductsController_RetrieveProductByName_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -213,11 +272,10 @@ namespace Refaction.UnitTests.UnitTests
                 .Returns(new Product[] { SampleModels.Product1 })
                 .Verifiable();
 
-            var products = CurrentProductsController.GetProductsByName("1");
+            var actionResult = CurrentProductsController.GetProductsByName("1");
 
-            var productsArray = products.Items.ToArray();
-            Assert.IsTrue(productsArray.Count() == 1);
-            Assert.IsTrue(ModelComparer.AreEquivalent(productsArray[0], SampleModels.Product1));
+            var contentResult = actionResult as OkNegotiatedContentResult<Products>;
+            Assert.IsNotNull(contentResult);
 
             // verify retrieve method called once
             this.MockProductRepository
@@ -226,8 +284,20 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
+        public void ProductsController_RetrieveProductByName_ShouldReturnBadRequestResult_WhenModelStateIsInvalid()
+        {
+            UseEmptyDatabase();
+
+            CurrentProductsController.ModelState.AddModelError("productId", "fakeError");
+            var actionResult = CurrentProductsController.GetProductsByName(null);
+
+            var contentResult = actionResult as BadRequestResult;
+            Assert.IsNotNull(contentResult);
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(HttpResponseException_NotFoundException))]
-        public void ProductsController_UpdateUsingEmptyDatabase_ShouldThrowNotFound()
+        public void ProductsController_Update_UsingEmptyDatabase_ShouldThrowNotFound()
         {
             UseEmptyDatabase();
 
@@ -242,11 +312,14 @@ namespace Refaction.UnitTests.UnitTests
                 .Throws(new HttpResponseException_NotFoundException())
                 .Verifiable();
 
-            CurrentProductsController.UpdateProduct(product.Id, product);
+            var actionResult = CurrentProductsController.UpdateProduct(product.Id, product);
+
+            var contentResult = actionResult as NotFoundResult;
+            Assert.IsNotNull(contentResult);
         }
 
         [TestMethod]
-        public void ProductsController_UpdateUsingSampleDatabase()
+        public void ProductsController_Update_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -260,7 +333,10 @@ namespace Refaction.UnitTests.UnitTests
                 .Setup(m => m.Update(It.Is<Product>(v => ModelComparer.AreEquivalent(v, product))))
                 .Verifiable();
 
-            CurrentProductsController.UpdateProduct(product.Id, product);
+            var actionResult = CurrentProductsController.UpdateProduct(product.Id, product);
+
+            var contentResult = actionResult as OkResult;
+            Assert.IsNotNull(contentResult);
 
             // ensure that submitted product was not altered
             Assert.IsTrue(ModelComparer.AreEquivalent(copyOfProduct, product));
@@ -270,10 +346,22 @@ namespace Refaction.UnitTests.UnitTests
                 .Verify(m => m.Update(It.Is<Product>(v => ModelComparer.AreEquivalent(v, product))),
                 Times.Once());
         }
-        
+
+        [TestMethod]
+        public void ProductsController_Update_ReturnsBadRequestResult_WhenModelStateIsInvalid()
+        {
+            UseEmptyDatabase();
+
+            CurrentProductsController.ModelState.AddModelError("productId", "fakeError");
+            var actionResult = CurrentProductsController.UpdateProduct(Guid.Empty, null);
+
+            var contentResult = actionResult as BadRequestResult;
+            Assert.IsNotNull(contentResult);
+        }
+
         [TestMethod]
         [ExpectedException(typeof(HttpResponseException_NotFoundException))]
-        public void ProductsController_DeleteUsingEmptyDatabase_ShouldThrowNotFound()
+        public void ProductsController_Delete_UsingEmptyDatabase_ShouldThrowNotFoundException()
         {
             UseEmptyDatabase();
 
@@ -289,7 +377,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void ProductsController_DeleteUsingSampleDatabase()
+        public void ProductsController_Delete_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -300,7 +388,10 @@ namespace Refaction.UnitTests.UnitTests
                 .Setup(m => m.Delete(It.Is<Guid>(v => v == product.Id)))
                 .Verifiable();
 
-            CurrentProductsController.DeleteProduct(product.Id);
+            var actionResult = CurrentProductsController.DeleteProduct(product.Id);
+
+            var contentResult = actionResult as OkResult;
+            Assert.IsNotNull(contentResult);
 
             // verify update method called once
             this.MockProductRepository
@@ -308,6 +399,17 @@ namespace Refaction.UnitTests.UnitTests
                 Times.Once());
         }
 
+        [TestMethod]
+        public void ProductsController_Delete_ReturnsBadRequestResult_WhenModelStateIsInvalid()
+        {
+            UseEmptyDatabase();
+
+            CurrentProductsController.ModelState.AddModelError("productId", "fakeError");
+            var actionResult = CurrentProductsController.DeleteProduct(Guid.Empty);
+
+            var contentResult = actionResult as BadRequestResult;
+            Assert.IsNotNull(contentResult);
+        }
 
 
         /////////////////////////////////
@@ -320,7 +422,7 @@ namespace Refaction.UnitTests.UnitTests
 
 
         [TestMethod]
-        public void ProductOptionsController_CreateProductOptionUsingEmptyDatabase()
+        public void ProductsController_CreateProductOption_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -340,7 +442,10 @@ namespace Refaction.UnitTests.UnitTests
                 .Setup(m => m.Create(It.Is<ProductOption>(v => ModelComparer.AreEquivalent(v, productOption))))
                 .Verifiable();
 
-            CurrentProductsController.CreateOption(productOption.ProductId, productOption);
+            var actionResult = CurrentProductsController.CreateOption(productOption.ProductId, productOption);
+
+            var contentResult = actionResult as OkResult;
+            Assert.IsNotNull(contentResult);
 
             // make sure that the new productOption id was assigned, and nothing else changed
             Assert.IsTrue(productOption.Id != copyOfProductOption.Id);
@@ -354,52 +459,76 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void ProductOptionsController_RetrieveAllProductOptionsUsingEmptyDatabase()
+        public void ProductsController_CreateProductOption_ReturnsBadRequestResult_WhenModelStateIsInvalid()
+        {
+            UseEmptyDatabase();
+
+            CurrentProductsController.ModelState.AddModelError("productId", "fakeError");
+            var actionResult = CurrentProductsController.CreateOption(Guid.Empty, null);
+
+            var contentResult = actionResult as BadRequestResult;
+            Assert.IsNotNull(contentResult);
+        }
+
+        [TestMethod]
+        public void ProductsController_RetrieveAllProductOptions_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
             // expect call to retrieve method
             this.MockProductOptionRepository
-                .Setup(m => m.RetrieveByProductId(It.Is<Guid>(v=>v == SampleModels.Product1.Id)))
+                .Setup(m => m.RetrieveByProductId(It.Is<Guid>(v => v == SampleModels.Product1.Id)))
                 .Returns(_emptyProductOptionArray)
                 .Verifiable();
 
-            var productOptions = CurrentProductsController.GetOptions(SampleModels.Product1.Id);
+            var actionResult = CurrentProductsController.GetOptions(SampleModels.Product1.Id);
 
-            Assert.IsTrue(productOptions.Items.Count() == 0);
+            var contentResult = actionResult as OkNegotiatedContentResult<ProductOptions>;
+            Assert.IsNotNull(contentResult);
 
             // verify that retrieve method was called once
             this.MockProductOptionRepository
-                .Verify(m => m.RetrieveByProductId(It.Is<Guid>(v=>v == SampleModels.Product1.Id)),
+                .Verify(m => m.RetrieveByProductId(It.Is<Guid>(v => v == SampleModels.Product1.Id)),
                 Times.Once());
         }
 
         [TestMethod]
-        public void ProductOptionsController_RetrieveAllProductOptionsUsingSampleDatabase()
+        public void ProductsController_RetrieveAllProductOptions_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
             // expect call to retrieve method
             this.MockProductOptionRepository
-                .Setup(m => m.RetrieveByProductId(It.Is<Guid>(v=>v == SampleModels.Product1.Id)))
+                .Setup(m => m.RetrieveByProductId(It.Is<Guid>(v => v == SampleModels.Product1.Id)))
                 .Returns(new ProductOption[] { SampleModels.ProductOption1, SampleModels.ProductOption3 })
                 .Verifiable();
 
-            var productOptions = CurrentProductsController.GetOptions(SampleModels.Product1.Id);
-            var productOptionsArray = productOptions.Items.ToArray();
-            Assert.IsTrue(productOptionsArray.Count() == 2);
-            Assert.IsTrue(ModelComparer.AreEquivalent(productOptionsArray[0], SampleModels.ProductOption1));
-            Assert.IsTrue(ModelComparer.AreEquivalent(productOptionsArray[1], SampleModels.ProductOption3));
+            var actionResult = CurrentProductsController.GetOptions(SampleModels.Product1.Id);
+
+            var contentResult = actionResult as OkNegotiatedContentResult<ProductOptions>;
+            Assert.IsNotNull(contentResult);
 
             // verify that retrieve method was called once
             this.MockProductOptionRepository
-                .Verify(m => m.RetrieveByProductId(It.Is<Guid>(v=>v == SampleModels.Product1.Id)),
+                .Verify(m => m.RetrieveByProductId(It.Is<Guid>(v => v == SampleModels.Product1.Id)),
                 Times.Once());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(HttpResponseException_NotFoundException))]
-        public void ProductOptionsController_RetrieveProductOptionByIdUsingEmptyDatabase_ShouldThrowNotFoundException()
+        public void ProductsController_RetrieveAllProductOptions_ReturnsBadRequestResult_WhenModelStateIsInvalid()
+        {
+            UseEmptyDatabase();
+
+            CurrentProductsController.ModelState.AddModelError("productId", "fakeError");
+            var actionResult = CurrentProductsController.GetOptions(Guid.Empty);
+
+            var contentResult = actionResult as BadRequestResult;
+            Assert.IsNotNull(contentResult);
+        }
+
+
+        [TestMethod]
+        public void ProductsController_RetrieveProductOptionById_UsingEmptyDatabase_ShouldThrowNotFoundException()
         {
             UseEmptyDatabase();
 
@@ -409,11 +538,14 @@ namespace Refaction.UnitTests.UnitTests
                 .Returns((ProductOption)null)
                 .Verifiable();
 
-            var productOption = CurrentProductsController.GetOption(SampleModels.Product1.Id, SampleModels.ProductOption3.Id);
+            var actionResult = CurrentProductsController.GetOption(SampleModels.Product1.Id, SampleModels.ProductOption3.Id);
+
+            var contentResult = actionResult as NotFoundResult;
+            Assert.IsNotNull(contentResult);
         }
 
         [TestMethod]
-        public void ProductOptionsController_RetrieveProductOptionByIdUsingSampleDatabase()
+        public void ProductsController_RetrieveProductOptionById_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -423,9 +555,10 @@ namespace Refaction.UnitTests.UnitTests
                 .Returns(SampleModels.ProductOption3)
                 .Verifiable();
 
-            var productOption = CurrentProductsController.GetOption(SampleModels.Product1.Id, SampleModels.ProductOption3.Id);
+            var actionResult = CurrentProductsController.GetOption(SampleModels.Product1.Id, SampleModels.ProductOption3.Id);
 
-            Assert.IsTrue(ModelComparer.AreEquivalent(productOption, SampleModels.ProductOption3));
+            var contentResult = actionResult as OkNegotiatedContentResult<ProductOption>;
+            Assert.IsNotNull(contentResult);
 
             // verify retrieve method called once
             this.MockProductOptionRepository
@@ -434,8 +567,21 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
+        public void ProductsController_RetrieveProductOptionById_ReturnsBadRequestResult_WhenModelStateIsInvalid()
+        {
+            UseEmptyDatabase();
+
+            CurrentProductsController.ModelState.AddModelError("productId", "fakeError");
+            var actionResult = CurrentProductsController.GetOption(Guid.Empty, Guid.Empty);
+
+            var contentResult = actionResult as BadRequestResult;
+            Assert.IsNotNull(contentResult);
+        }
+
+
+        [TestMethod]
         [ExpectedException(typeof(HttpResponseException_NotFoundException))]
-        public void ProductOptionsController_UpdateUsingEmptyDatabase_ShouldThrowNotFound()
+        public void ProductsController_UpdateProductOption_UsingEmptyDatabase_ShouldThrowNotFound()
         {
             UseEmptyDatabase();
 
@@ -454,7 +600,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void ProductOptionsController_UpdateUsingSampleDatabase()
+        public void ProductsController_UpdateProductOption_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -468,7 +614,10 @@ namespace Refaction.UnitTests.UnitTests
                 .Setup(m => m.Update(It.Is<ProductOption>(v => ModelComparer.AreEquivalent(v, productOption))))
                 .Verifiable();
 
-            CurrentProductsController.UpdateOption(productOption.ProductId, productOption.Id, productOption);
+            var actionResult = CurrentProductsController.UpdateOption(productOption.ProductId, productOption.Id, productOption);
+
+            var contentResult = actionResult as OkResult;
+            Assert.IsNotNull(contentResult);
 
             // ensure that submitted productOption was not altered
             Assert.IsTrue(ModelComparer.AreEquivalent(copyOfProductOption, productOption));
@@ -480,8 +629,20 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
+        public void ProductsController_UpdateProductOption_ShouldReturnBadRequest_WhenModelStateIsInvalid()
+        {
+            UseEmptyDatabase();
+
+            CurrentProductsController.ModelState.AddModelError("productId", "fakeError");
+            var actionResult = CurrentProductsController.UpdateOption(Guid.Empty, Guid.Empty, null);
+
+            var contentResult = actionResult as BadRequestResult;
+            Assert.IsNotNull(contentResult);
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(HttpResponseException_NotFoundException))]
-        public void ProductOptionsController_DeleteUsingEmptyDatabase_ShouldThrowNotFound()
+        public void ProductsController_DeleteProductOption_UsingEmptyDatabase_ShouldThrowNotFound()
         {
             UseEmptyDatabase();
 
@@ -497,7 +658,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void ProductOptionsController_DeleteUsingSampleDatabase()
+        public void ProductsController_DeleteProductOption_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -508,7 +669,10 @@ namespace Refaction.UnitTests.UnitTests
                 .Setup(m => m.Delete(It.Is<Guid>(v => v == productOption.Id)))
                 .Verifiable();
 
-            CurrentProductsController.DeleteOption(productOption.Id);
+            var actionResult = CurrentProductsController.DeleteOption(productOption.Id);
+
+            var contentResult = actionResult as OkResult;
+            Assert.IsNotNull(contentResult);
 
             // verify update method called once
             this.MockProductOptionRepository
@@ -517,7 +681,17 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void ProductOptionsController_Dispose()
+        public void ProductsController_DeleteProductOption_ReturnsBadRequestResult_WhenModelStateIsInvalid()
+        {
+            UseEmptyDatabase();
+
+            CurrentProductsController.ModelState.AddModelError("productId", "fakeError");
+            var actionResult = CurrentProductsController.DeleteOption(Guid.Empty);
+        }
+
+
+        [TestMethod]
+        public void ProductsController_Dispose()
         {
             UseEmptyDatabase();
 
@@ -567,7 +741,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void ProductOptionsController_DefaultConstructor()
+        public void ProductsController_DefaultConstructor()
         {
             // ensure 100% code coverage
             var controller = new ProductsController();

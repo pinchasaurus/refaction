@@ -1,15 +1,13 @@
-﻿using System;
+﻿using Refaction.Data;
+using Refaction.Data.Entities;
+using System;
 using System.Collections.Generic;
+using System.Data.Entity;
+using System.Data.Entity.Core.Objects;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-
-using System.Data.Entity;
-
-using Refaction.Data;
-using Refaction.Data.Entities;
-using System.Data.Entity.Core.Objects;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Refaction.Data.Fakes
 {

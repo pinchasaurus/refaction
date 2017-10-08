@@ -1,16 +1,15 @@
-﻿using System;
+﻿using Refaction.Common.Patterns;
+using Refaction.Data;
+using Refaction.Data.Entities;
+using Refaction.Service.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Linq.Expressions;
-
-using Refaction.Common.Patterns;
-using Refaction.Data;
-using Refaction.Service.Models;
 using System.Web.Http;
-using System.Net.Http;
-using Refaction.Data.Entities;
 
 namespace Refaction.Service.Repositories
 {

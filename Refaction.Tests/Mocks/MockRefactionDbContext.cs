@@ -1,15 +1,13 @@
-﻿using System;
+﻿using Moq;
+using Refaction.Data;
+using Refaction.Data.Entities;
+using Refaction.Data.Fakes;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using Moq;
-
-using Refaction.Data;
-using Refaction.Data.Entities;
-using Refaction.Data.Fakes;
 
 namespace Refaction.UnitTests.Mocks
 {

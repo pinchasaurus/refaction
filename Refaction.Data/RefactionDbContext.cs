@@ -1,9 +1,8 @@
-using System;
-using System.Data.Entity;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-
 using Refaction.Data.Entities;
+using System;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity;
+using System.Linq;
 
 namespace Refaction.Data
 {

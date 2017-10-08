@@ -1,20 +1,18 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using System.Data.Entity;
-using Refaction.Data.Entities;
-using Refaction.Data;
-using Refaction.Service.Repositories;
-using Refaction.Service.Models;
-using System.Collections.Generic;
-using System.Web.Http;
-using System.Linq;
-using Refaction.Service;
-using Refaction.Data.Fakes;
-using Refaction.UnitTests;
-
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ninject;
 using Ninject.Parameters;
+using Refaction.Data;
+using Refaction.Data.Entities;
+using Refaction.Data.Fakes;
+using Refaction.Service;
+using Refaction.Service.Models;
+using Refaction.Service.Repositories;
+using Refaction.UnitTests;
+using System;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.Linq;
+using System.Web.Http;
 
 namespace Refaction.Tests.UnitTests
 {

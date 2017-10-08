@@ -23,7 +23,8 @@ namespace Refaction.Service
         public static void BindFakeDbContext(IKernel kernel)
         {
             kernel.Rebind<IRefactionDbContext>()
-                .ToConstant(_db);
+                .ToConstant(_db)
+                .InSingletonScope();
         }
 
         /// <summary>

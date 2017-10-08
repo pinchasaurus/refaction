@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Ninject;
-
 using Refaction.Data;
 using Refaction.Data.Entities;
 using Refaction.Service;
@@ -13,6 +8,9 @@ using Refaction.Service.Models;
 using Refaction.Service.Repositories;
 using Refaction.UnitTests;
 using Refaction.UnitTests.Mocks;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Refaction.Tests.UnitTests
 {
@@ -51,7 +49,7 @@ namespace Refaction.Tests.UnitTests
 
 
         [TestMethod]
-        public void ProductRepository_CreateProductUsingEmptyDatabase()
+        public void ProductRepository_CreateProduct_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -61,7 +59,7 @@ namespace Refaction.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ProductRepository_CreateProductUsingSampleDatabase()
+        public void ProductRepository_CreateProduct_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -114,7 +112,7 @@ namespace Refaction.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ProductRepository_RetrieveAllProductsUsingEmptyDatabase()
+        public void ProductRepository_RetrieveAllProducts_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -131,7 +129,7 @@ namespace Refaction.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ProductRepository_RetrieveAllProductsUsingSampleDatabase()
+        public void ProductRepository_RetrieveAllProducts_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -151,7 +149,7 @@ namespace Refaction.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ProductRepository_RetrieveProductByIdUsingSampleDatabase()
+        public void ProductRepository_RetrieveProductById_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -181,7 +179,7 @@ namespace Refaction.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ProductRepository_RetrieveProductByNameUsingSampleDatabase()
+        public void ProductRepository_RetrieveProductByName_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -251,7 +249,7 @@ namespace Refaction.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ProductRepository_DeleteProductUsingSampleDatabase()
+        public void ProductRepository_DeleteProduct_UsingSampleDatabase()
         {
             UseSampleDatabase();
 

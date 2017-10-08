@@ -1,16 +1,14 @@
-﻿using System;
-using System.Net;
-using System.Web.Http;
-using System.Collections.Generic;
-
-using System.Linq;
-
+﻿using NSwag.Annotations;
 using Refaction.Data;
+using Refaction.Data.Fakes;
 using Refaction.Service.Models;
 using Refaction.Service.Repositories;
-using Refaction.Data.Fakes;
-
-using NSwag.Annotations;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Web.Http;
+using System.Web.Http.Description;
 
 namespace Refaction.Service.Controllers
 {
@@ -53,116 +51,193 @@ namespace Refaction.Service.Controllers
 
         [Route]
         [HttpGet]
-        public Products GetAllProducts()
+        [System.Web.Http.Description.ResponseType(typeof(Products))] // disambiguate response type to prevent confusion with swagger attribute of same name
+        public IHttpActionResult GetAllProducts()
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             var items = _productRepository.Retrieve();
 
-            return new Products(items);
+            var result = new Products(items);
+            return Ok(result);
         }
 
         [Route]
         [HttpGet]
         [SwaggerIgnore] // Swagger does not support actions whose routes differ only by their query string
-        public Products GetProductsByName(string name)
+        public IHttpActionResult GetProductsByName(string name)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             var items = _productRepository.Retrieve(name);
 
-            return new Products(items);
+            var result = new Products(items);
+
+            return Ok(result);
         }
 
         [Route("{id}")]
         [HttpGet]
-        public Product GetProduct(Guid id)
+        [System.Web.Http.Description.ResponseType(typeof(Product))] // disambiguate response type to prevent confusion with swagger attribute of same name
+        public IHttpActionResult GetProduct(Guid id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             var result = _productRepository.Retrieve(id);
 
             if (result == null)
             {
-                throw new HttpResponseException_NotFoundException();
+                return NotFound();
             }
             else
             {
-                return result;
+                return Ok(result);
             }
         }
 
         [Route]
         [HttpPost]
-        public void CreateProduct(Product product)
+        public IHttpActionResult CreateProduct(Product product)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             product.Id = Guid.NewGuid();
 
             _productRepository.Create(product);
+
+            return Ok();
         }
 
-        [Route("{id}")]
+        [Route("{id:guid}")]
         [HttpPut]
-        public void UpdateProduct(Guid id, Product product)
+        public IHttpActionResult UpdateProduct(Guid id, Product product)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             product.Id = id;
 
             _productRepository.Update(product);
+
+            return Ok();
         }
 
         [Route("{id}")]
         [HttpDelete]
-        public void DeleteProduct(Guid id)
+        public IHttpActionResult DeleteProduct(Guid id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             _productRepository.Delete(id);
+
+            return Ok();
         }
 
-        [Route("{productId}/options")]
+        [Route("{productId:guid}/options")]
         [HttpGet]
-        public ProductOptions GetOptions(Guid productId)
+        [System.Web.Http.Description.ResponseType(typeof(ProductOptions))] // disambiguate response type to prevent confusion with swagger attribute of same name
+
+        public IHttpActionResult GetOptions(Guid productId)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             var items = _productOptionRepository.RetrieveByProductId(productId);
 
-            return new ProductOptions(items);
+            var result = new ProductOptions(items);
+
+            return Ok(result);
         }
 
-        [Route("{productId}/options/{id}")]
+        [Route("{productId:guid}/options/{id:guid}")]
         [HttpGet]
-        public ProductOption GetOption(Guid productId, Guid id)
+        [System.Web.Http.Description.ResponseType(typeof(ProductOption))] // disambiguate response type to prevent confusion with swagger attribute of same name
+        public IHttpActionResult GetOption(Guid productId, Guid id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             var result =
                 _productOptionRepository
                 .RetrieveByBothIds(productId, id);
 
             if (result == null)
             {
-                throw new HttpResponseException_NotFoundException();
+                return NotFound();
             }
             else
             {
-                return result;
+                return Ok(result);
             }
         }
 
-        [Route("{productId}/options")]
+        [Route("{productId:guid}/options")]
         [HttpPost]
-        public void CreateOption(Guid productId, ProductOption option)
+        public IHttpActionResult CreateOption(Guid productId, ProductOption option)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             option.Id = Guid.NewGuid();
             option.ProductId = productId;
 
             _productOptionRepository.Create(option);
+
+            return Ok();
         }
 
-        [Route("{productId}/options/{id}")]
+        [Route("{productId}/options/{id:guid}")]
         [HttpPut]
-        public void UpdateOption(Guid productId, Guid id, ProductOption option)
+        public IHttpActionResult UpdateOption(Guid productId, Guid id, ProductOption option)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             option.Id = id;
             option.ProductId = productId;
 
             _productOptionRepository.Update(option);
+
+            return Ok();
         }
 
-        [Route("{productId}/options/{id}")]
+        [Route("{productId}/options/{id:guid}")]
         [HttpDelete]
-        public void DeleteOption(Guid id)
+        public IHttpActionResult DeleteOption(Guid id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             _productOptionRepository.Delete(id);
+
+            return Ok();
         }
 
     }

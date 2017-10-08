@@ -1,30 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-using System.Configuration;
-using System.Threading.Tasks;
-using System.Reflection;
-
-using System.Web.Cors;
-using System.Web.Http;
-
-using Owin;
-using Microsoft.Owin;
+﻿using Microsoft.Owin;
 using Microsoft.Owin.Cors;
-
 using Ninject;
 using Ninject.Web.Common.OwinHost;
 using Ninject.Web.WebApi.OwinHost;
-
 using NSwag.AspNet.Owin;
-
+using Owin;
 using Refaction.Common;
 using Refaction.Data;
 using Refaction.Data.Entities;
 using Refaction.Data.Fakes;
 using Refaction.Service.Repositories;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Cors;
+using System.Web.Http;
 
 [assembly: OwinStartup(typeof(Refaction.Service.OwinStartup))]
 

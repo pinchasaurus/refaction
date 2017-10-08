@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.Owin.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using System.Net.Http;
-
-using Microsoft.Owin.Testing;
-using Refaction.Service.Models;
+using Refaction.Common;
 using Refaction.Data;
 using Refaction.Data.Fakes;
-using Refaction.Common;
 using Refaction.Service;
-using Refaction.Tests;
+using Refaction.Service.Models;
 using Refaction.Service.Repositories;
+using Refaction.Tests;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 
 namespace Refaction.UnitTests.UnitTests
 {
@@ -49,7 +47,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void RefactionService_CreateProductUsingEmptyDatabase()
+        public void RefactionService_CreateProduct_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -64,7 +62,7 @@ namespace Refaction.UnitTests.UnitTests
                 };
 
             var response = _client.PostAsJsonAsync("http://testserver/products", submittedProduct).Result;
-            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.NoContent);
+            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.OK);
 
             var retrieveResponse = _client.GetAsync($"http://testserver/products").Result;
             Assert.IsTrue(retrieveResponse.StatusCode == System.Net.HttpStatusCode.OK);
@@ -81,7 +79,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void RefactionService_CreateProductUsingSampleDatabase()
+        public void RefactionService_CreateProduct_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -96,7 +94,7 @@ namespace Refaction.UnitTests.UnitTests
                 };
 
             var response = _client.PostAsJsonAsync("http://testserver/products", submittedProduct).Result;
-            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.NoContent);
+            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.OK);
 
             var retrieveResponse = _client.GetAsync($"http://testserver/products").Result;
             Assert.IsTrue(retrieveResponse.StatusCode == System.Net.HttpStatusCode.OK);
@@ -115,7 +113,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void RefactionService_GetAllProductsUsingEmptyDatabase()
+        public void RefactionService_GetAllProducts_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -144,7 +142,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void RefactionService_GetProductByIdUsingEmptyDatabase()
+        public void RefactionService_GetProductById_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -165,7 +163,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void RefactionService_GetProductsByNameUsingEmptyDatabase()
+        public void RefactionService_GetProductsByName_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -192,7 +190,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void RefactionService_UpdateProductUsingEmptyDatabase()
+        public void RefactionService_UpdateProduct_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -212,7 +210,7 @@ namespace Refaction.UnitTests.UnitTests
             submittedProduct.DeliveryPrice = 1234.56M;
 
             var response = _client.PutAsJsonAsync<Product>($"http://testserver/products/{submittedProduct.Id}", submittedProduct).Result;
-            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.NoContent);
+            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.OK);
 
             var updatedResponse = _client.GetAsync($"http://testserver/products/{submittedProduct.Id}").Result;
             Assert.IsTrue(updatedResponse.StatusCode == System.Net.HttpStatusCode.OK);
@@ -222,7 +220,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void RefactionService_DeleteProductUsingEmptyDatabase()
+        public void RefactionService_DeleteProduct_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -236,7 +234,7 @@ namespace Refaction.UnitTests.UnitTests
             UseSampleDatabase();
 
             var response = _client.DeleteAsync($"http://testserver/products/{SampleModels.Product1.Id}").Result;
-            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.NoContent);
+            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.OK);
 
             var retrieveResponse = _client.GetAsync($"http://testserver/products").Result;
             Assert.IsTrue(retrieveResponse.StatusCode == System.Net.HttpStatusCode.OK);
@@ -257,7 +255,7 @@ namespace Refaction.UnitTests.UnitTests
         ////////////////////////////
 
         [TestMethod]
-        public void RefactionService_CreateProductOptionUsingEmptyDatabase()
+        public void RefactionService_CreateProductOption_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -274,7 +272,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void RefactionService_CreateProductOptionUsingSampleDatabase()
+        public void RefactionService_CreateProductOption_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -290,7 +288,7 @@ namespace Refaction.UnitTests.UnitTests
             var location = $"http://testserver/product/{submittedProductOption.ProductId}/options";
 
             var response = _client.PostAsJsonAsync($"http://testserver/products/{submittedProductOption.ProductId}/options", submittedProductOption).Result;
-            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.NoContent);
+            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.OK);
 
             var retrieveResponse = _client.GetAsync($"http://testserver/products/{submittedProductOption.ProductId}/options").Result;
             Assert.IsTrue(retrieveResponse.StatusCode == System.Net.HttpStatusCode.OK);
@@ -316,7 +314,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void RefactionService_GetProductOptionsByProductIdUsingEmptyDatabase()
+        public void RefactionService_GetProductOptionsByProductId_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -352,7 +350,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void RefactionService_GetProductOptionByBothIdsUsingEmptyDatabase()
+        public void RefactionService_GetProductOptionByBothIds_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -378,7 +376,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void RefactionService_UpdateProductOptionUsingEmptyDatabase()
+        public void RefactionService_UpdateProductOption_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -398,7 +396,7 @@ namespace Refaction.UnitTests.UnitTests
             submittedProductOption.Name = "The updated product option";
 
             var response = _client.PutAsJsonAsync<ProductOption>($"http://testserver/products/{submittedProductOption.ProductId}/options/{submittedProductOption.Id}", submittedProductOption).Result;
-            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.NoContent);
+            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.OK);
 
             var updatedResponse = _client.GetAsync($"http://testserver/products/{submittedProductOption.ProductId}/options/{submittedProductOption.Id}").Result;
             Assert.IsTrue(updatedResponse.StatusCode == System.Net.HttpStatusCode.OK);
@@ -413,7 +411,7 @@ namespace Refaction.UnitTests.UnitTests
         }
 
         [TestMethod]
-        public void RefactionService_DeleteProductOptionUsingEmptyDatabase()
+        public void RefactionService_DeleteProductOption_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -427,7 +425,7 @@ namespace Refaction.UnitTests.UnitTests
             UseSampleDatabase();
 
             var response = _client.DeleteAsync($"http://testserver/products/{SampleModels.Product1.Id}/options/{SampleModels.ProductOption1.Id}").Result;
-            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.NoContent);
+            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.OK);
 
             var retrieveResponse = _client.GetAsync($"http://testserver/products/{SampleModels.Product1.Id}/options").Result;
             Assert.IsTrue(retrieveResponse.StatusCode == System.Net.HttpStatusCode.OK);

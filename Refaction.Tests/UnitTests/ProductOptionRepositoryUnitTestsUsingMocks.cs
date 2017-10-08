@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Ninject;
-
 using Refaction.Data;
 using Refaction.Data.Entities;
 using Refaction.Service;
@@ -13,6 +8,9 @@ using Refaction.Service.Models;
 using Refaction.Service.Repositories;
 using Refaction.UnitTests;
 using Refaction.UnitTests.Mocks;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Refaction.Tests.UnitTests
 {
@@ -49,7 +47,7 @@ namespace Refaction.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ProductOptionRepository_CreateProductOptionUsingEmptyDatabase()
+        public void ProductOptionRepository_CreateProductOption_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -59,7 +57,7 @@ namespace Refaction.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ProductOptionRepository_CreateProductOptionUsingSampleDatabase()
+        public void ProductOptionRepository_CreateProductOption_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -112,7 +110,7 @@ namespace Refaction.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ProductOptionRepository_RetrieveAllProductOptionsUsingEmptyDatabase()
+        public void ProductOptionRepository_RetrieveAllProductOptions_UsingEmptyDatabase()
         {
             UseEmptyDatabase();
 
@@ -129,7 +127,7 @@ namespace Refaction.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ProductOptionRepository_RetrieveAllProductOptionsUsingSampleDatabase()
+        public void ProductOptionRepository_RetrieveAllProductOptions_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -150,7 +148,7 @@ namespace Refaction.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ProductOptionRepository_RetrieveProductOptionByIdUsingSampleDatabase()
+        public void ProductOptionRepository_RetrieveProductOptionById_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -180,7 +178,7 @@ namespace Refaction.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ProductOptionRepository_RetrieveProductOptionByProductIdUsingSampleDatabase()
+        public void ProductOptionRepository_RetrieveProductOptionByProductId_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -198,7 +196,7 @@ namespace Refaction.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ProductOptionRepository_RetrieveProductOptionByBothIdsUsingSampleDatabase()
+        public void ProductOptionRepository_RetrieveProductOptionByBothIds_UsingSampleDatabase()
         {
             UseSampleDatabase();
 
@@ -268,7 +266,7 @@ namespace Refaction.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ProductOptionRepository_DeleteProductOptionUsingSampleDatabase()
+        public void ProductOptionRepository_DeleteProductOption_UsingSampleDatabase()
         {
             UseSampleDatabase();
 

@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Ninject;
+using Refaction.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-
-using Ninject;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Refaction.Common;
 
 namespace Refaction.UnitTests
 {
